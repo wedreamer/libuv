@@ -780,6 +780,7 @@ uv_loop_t* uv_default_loop(void) {
   if (default_loop_ptr != NULL)
     return default_loop_ptr;
 
+  // 初始化默认的 loop
   if (uv_loop_init(&default_loop_struct))
     return NULL;
 
