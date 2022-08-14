@@ -70,13 +70,16 @@ int uv_timer_start(uv_timer_t* handle,
                    uint64_t repeat) {
   uint64_t clamped_timeout;
 
+  // handle 关闭或者没有回调
   if (uv__is_closing(handle) || cb == NULL)
     return UV_EINVAL;
 
   if (uv__is_active(handle))
+    // 再次执行 uv_timer_stop
     uv_timer_stop(handle);
 
   clamped_timeout = handle->loop->time + timeout;
+  // 如果需要执行的话
   if (clamped_timeout < timeout)
     clamped_timeout = (uint64_t) -1;
 
@@ -84,11 +87,14 @@ int uv_timer_start(uv_timer_t* handle,
   handle->timeout = clamped_timeout;
   handle->repeat = repeat;
   /* start_id is the second index to be compared in timer_less_than() */
+  // 增加对应的次数同时设置为 start_id
   handle->start_id = handle->loop->timer_counter++;
 
+  // 插入对应的堆
   heap_insert(timer_heap(handle->loop),
               (struct heap_node*) &handle->heap_node,
               timer_less_than);
+  // 放入到 active_handles 中
   uv__handle_start(handle);
 
   return 0;
@@ -96,9 +102,11 @@ int uv_timer_start(uv_timer_t* handle,
 
 
 int uv_timer_stop(uv_timer_t* handle) {
+  // 如果 handle 没有激活
   if (!uv__is_active(handle))
     return 0;
 
+  // 从时间堆中批量拿到
   heap_remove(timer_heap(handle->loop),
               (struct heap_node*) &handle->heap_node,
               timer_less_than);
@@ -165,11 +173,15 @@ void uv__run_timers(uv_loop_t* loop) {
   uv_timer_t* handle;
 
   for (;;) {
+    //  从 loop->timer_heap 拿到 min heap_node
     heap_node = heap_min(timer_heap(loop));
+    // 没有定时任务
     if (heap_node == NULL)
       break;
 
+    // 从 heap_node 拿到第一个 handle
     handle = container_of(heap_node, uv_timer_t, heap_node);
+    // 如果没有超时
     if (handle->timeout > loop->time)
       break;
 

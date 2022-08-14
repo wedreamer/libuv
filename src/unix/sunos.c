@@ -165,7 +165,9 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
   int user_timeout;
   int reset_timeout;
 
+  // 如果 loop 没有关联任何 nfds，则直接返回
   if (loop->nfds == 0) {
+    // 这个时候 watcher_queue 一定为空
     assert(QUEUE_EMPTY(&loop->watcher_queue));
     return;
   }
@@ -175,9 +177,12 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
     QUEUE_REMOVE(q);
     QUEUE_INIT(q);
 
+    // 初始化 uv__io_t 相关数据
     w = QUEUE_DATA(q, uv__io_t, watcher_queue);
+    // 只要 watcher queue 不为空，就一定有时间触发
     assert(w->pevents != 0);
 
+    // 关联 io 关心的相关事件
     if (port_associate(loop->backend_fd,
                        PORT_SOURCE_FD,
                        w->fd,
@@ -187,6 +192,7 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
       abort();
     }
 
+    // 将当前的 event 事件更新到 pevents
     w->events = w->pevents;
   }
 

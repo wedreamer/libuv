@@ -108,10 +108,13 @@ static void uv__getaddrinfo_work(struct uv__work* w) {
 static void uv__getaddrinfo_done(struct uv__work* w, int status) {
   uv_getaddrinfo_t* req;
 
+  // 通过 w 拿到 req
   req = container_of(w, uv_getaddrinfo_t, work_req);
+  // 减少索引计数
   uv__req_unregister(req->loop, req);
 
   /* See initialization in uv_getaddrinfo(). */
+  // 释放资源
   if (req->hints)
     uv__free(req->hints);
   else if (req->service)
@@ -131,6 +134,7 @@ static void uv__getaddrinfo_done(struct uv__work* w, int status) {
   }
 
   if (req->cb)
+    // 如果有回调函数, 执行对应的回调函数
     req->cb(req, req->retcode, req->addrinfo);
 }
 
@@ -177,7 +181,9 @@ int uv_getaddrinfo(uv_loop_t* loop,
   if (buf == NULL)
     return UV_ENOMEM;
 
+  // 初始化 req, 增加 loop 中 active_reqs 计数
   uv__req_init(loop, req, UV_GETADDRINFO);
+  // 增加相关属性
   req->loop = loop;
   req->cb = cb;
   req->addrinfo = NULL;
@@ -203,10 +209,13 @@ int uv_getaddrinfo(uv_loop_t* loop,
     req->hostname = memcpy(buf + len, hostname, hostname_len);
 
   if (cb) {
+    // 提交到 线程池 执行任务
     uv__work_submit(loop,
                     &req->work_req,
                     UV__WORK_SLOW_IO,
+                    // 实际执行的 work
                     uv__getaddrinfo_work,
+                    // 回调函数
                     uv__getaddrinfo_done);
     return 0;
   } else {

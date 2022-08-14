@@ -35,14 +35,18 @@
 
 #include <ctype.h>
 
+// 开始执行的路径
 extern char* original_exepath;
+// 进程 title 锁
 extern uv_mutex_t process_title_mutex;
+// pthread_once_t
 extern uv_once_t process_title_mutex_once;
 extern void init_process_title_mutex_once(void);
 
 uint64_t uv__hrtime(uv_clocktype_t type) {
   uint64_t G = 1000000000;
   timebasestruct_t t;
+  // ??
   read_wall_time(&t, TIMEBASE_SZ);
   time_base_to_time(&t, TIMEBASE_SZ);
   return (uint64_t) t.tb_high * G + t.tb_low;

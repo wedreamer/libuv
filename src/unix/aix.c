@@ -73,11 +73,13 @@ static char** process_argv = NULL;
 static int process_argc = 0;
 static char* process_title_ptr = NULL;
 
+// 初始化一次 process_title_mutex
 void init_process_title_mutex_once(void) {
   uv_mutex_init(&process_title_mutex);
 }
 
 
+// 平台 loop 初始化
 int uv__platform_loop_init(uv_loop_t* loop) {
   loop->fs_fd = -1;
 

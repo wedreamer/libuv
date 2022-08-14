@@ -20,11 +20,14 @@ int main() {
     options.flags = UV_PROCESS_DETACHED;
 
     int r;
+    // 子进程启动一个命令
+    // 以 detached 模式启动
     if ((r = uv_spawn(loop, &child_req, &options))) {
         fprintf(stderr, "%s\n", uv_strerror(r));
         return 1;
     }
     fprintf(stderr, "Launched sleep with PID %d\n", child_req.pid);
+    // 更新 loop 的 handle 计数
     uv_unref((uv_handle_t*) &child_req);
 
     return uv_run(loop, UV_RUN_DEFAULT);

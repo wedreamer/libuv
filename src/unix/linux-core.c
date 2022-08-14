@@ -83,10 +83,12 @@ static void read_speeds(unsigned int numcpus, uv_cpu_info_t* ci);
 static uint64_t read_cpufreq(unsigned int cpunum);
 
 int uv__platform_loop_init(uv_loop_t* loop) {
-  
+
+  // 初始化 inotify_fd 和 inotify_watchers
   loop->inotify_fd = -1;
   loop->inotify_watchers = NULL;
 
+  // epoll 初始化
   return uv__epoll_init(loop);
 }
 

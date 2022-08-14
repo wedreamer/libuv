@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.json": "jsonc",
+        "random": "c",
+        "uv.h": "c"
+    }
+}

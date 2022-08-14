@@ -46,7 +46,9 @@ int uv_loop_init(uv_loop_t* loop) {
   if (err)
     goto fail_metrics_mutex_init;
 
+  // 初始化事件堆
   heap_init((struct heap*) &loop->timer_heap);
+  // 各种队列初始化
   QUEUE_INIT(&loop->wq);
   QUEUE_INIT(&loop->idle_handles);
   QUEUE_INIT(&loop->async_handles);
@@ -74,32 +76,40 @@ int uv_loop_init(uv_loop_t* loop) {
   loop->timer_counter = 0;
   loop->stop_flag = 0;
 
+  // 对应平台的初始化
   err = uv__platform_loop_init(loop);
   if (err)
     goto fail_platform_init;
 
+  // TODO： 全局信号初始化
   uv__signal_global_once_init();
   err = uv_signal_init(loop, &loop->child_watcher);
   if (err)
     goto fail_signal_init;
 
+  // TODO：
   uv__handle_unref(&loop->child_watcher);
   loop->child_watcher.flags |= UV_HANDLE_INTERNAL;
   QUEUE_INIT(&loop->process_handles);
 
+  // cloexec_lock rw 锁互斥锁初始化
   err = uv_rwlock_init(&loop->cloexec_lock);
   if (err)
     goto fail_rwlock_init;
 
+  // wq_mutex 互斥锁初始化
   err = uv_mutex_init(&loop->wq_mutex);
   if (err)
     goto fail_mutex_init;
 
+  // 异步队列以及异步回调队列初始化
   err = uv_async_init(loop, &loop->wq_async, uv__work_done);
   if (err)
     goto fail_async_init;
 
+  // 初始化异步 handle 的 flags
   uv__handle_unref(&loop->wq_async);
+  // 设置 wq_async 的 flags
   loop->wq_async.flags |= UV_HANDLE_INTERNAL;
 
   return 0;

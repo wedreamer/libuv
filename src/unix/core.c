@@ -315,6 +315,7 @@ static void uv__finish_close(uv_handle_t* handle) {
   uv__handle_unref(handle);
   QUEUE_REMOVE(&handle->handle_queue);
 
+  // 如果注册的有 close_cb 则此时调用
   if (handle->close_cb) {
     handle->close_cb(handle);
   }
@@ -347,7 +348,8 @@ int uv_backend_fd(const uv_loop_t* loop) {
 
 
 static int uv__loop_alive(const uv_loop_t* loop) {
-  return uv__has_active_handles(loop) ||
+  // active_handles active_reqs pending_queue 
+  return uv__has_active_handles(loop) ||closing_handles
          uv__has_active_reqs(loop) ||
          !QUEUE_EMPTY(&loop->pending_queue) ||
          loop->closing_handles != NULL;
@@ -386,38 +388,52 @@ int uv_run(uv_loop_t* loop, uv_run_mode mode) {
 
   r = uv__loop_alive(loop);
   if (!r)
+    // 如果 loop 不存活, 则更新时间
     uv__update_time(loop);
 
+  // loop 存活
   while (r != 0 && loop->stop_flag == 0) {
+    // 更新时间
     uv__update_time(loop);
     uv__run_timers(loop);
 
+    // 如果 pending_queue 和 idle_handles 都为空, 则睡觉, 空转
     can_sleep =
         QUEUE_EMPTY(&loop->pending_queue) && QUEUE_EMPTY(&loop->idle_handles);
 
+    // 运行 pending 
     uv__run_pending(loop);
+    // 运行 idle
     uv__run_idle(loop);
+    // 运行 prepare
     uv__run_prepare(loop);
 
     timeout = 0;
+    // 如果可以睡觉, 且只执行一次或者是默认模式执行
     if ((mode == UV_RUN_ONCE && can_sleep) || mode == UV_RUN_DEFAULT)
+      // 更新 timeout 时间, 根据定时任务设定最小 timeout
       timeout = uv__backend_timeout(loop);
 
+    // poll io 并且执行对应的 callback, 阻塞多长事件由 timeout 决定
     uv__io_poll(loop, timeout);
 
     /* Process immediate callbacks (e.g. write_cb) a small fixed number of
      * times to avoid loop starvation.*/
+    // 处理即时回调（例如write_cb）少量固定次数，以避免循环饥饿
+    // 这里循环了 8 次
     for (r = 0; r < 8 && !QUEUE_EMPTY(&loop->pending_queue); r++)
       uv__run_pending(loop);
 
     /* Run one final update on the provider_idle_time in case uv__io_poll
-     * returned because the timeout expired, but no events were received. This
-     * call will be ignored if the provider_entry_time was either never set (if
-     * the timeout == 0) or was already updated b/c an event was received.
+       returned because the timeout expired, but no events were received. This
+       call will be ignored if the provider_entry_time was either never set (if
+       the timeout == 0) or was already updated b/c an event was received.
      */
+    // 对 provider_idle_time 运行最后一次更新，以防 uv__io_poll 由于超时过期而返回，但未收到任何事件。如果 provider_entry_time 从未设置（如果超时 == 0）或已更新 b / c ，则此调用将被忽略收到事件。
     uv__metrics_update_idle_time(loop);
 
     uv__run_check(loop);
+    // 收尾, 关闭一些不用的 socket
     uv__run_closing_handles(loop);
 
     if (mode == UV_RUN_ONCE) {
@@ -429,6 +445,7 @@ int uv_run(uv_loop_t* loop, uv_run_mode mode) {
        * UV_RUN_NOWAIT makes no guarantees about progress so it's omitted from
        * the check.
        */
+      // 如果只运行一次, 更新时间, 再此运行 timers
       uv__update_time(loop);
       uv__run_timers(loop);
     }
@@ -800,13 +817,18 @@ static void uv__run_pending(uv_loop_t* loop) {
   QUEUE pq;
   uv__io_t* w;
 
+  // pending_queue 移动到 pq
   QUEUE_MOVE(&loop->pending_queue, &pq);
 
+  // 这里和 uv__run_idle uv__run_check uv__run_prepare 有区别
+  // 如果 pq 不为空, 则意味着有事件处理
   while (!QUEUE_EMPTY(&pq)) {
+    // header
     q = QUEUE_HEAD(&pq);
     QUEUE_REMOVE(q);
     QUEUE_INIT(q);
     w = QUEUE_DATA(q, uv__io_t, pending_queue);
+    // 调用回调函数
     w->cb(loop, w, POLLOUT);
   }
 }
@@ -869,7 +891,7 @@ void uv__io_init(uv__io_t* w, uv__io_cb cb, int fd) {
   w->pevents = 0;
 }
 
-
+// POLLPRI, POLLIN 可读 POLLOUT 可写 POLLRDHUP 关闭
 void uv__io_start(uv_loop_t* loop, uv__io_t* w, unsigned int events) {
   assert(0 == (events & ~(POLLIN | POLLOUT | UV__POLLRDHUP | UV__POLLPRI)));
   assert(0 != events);
@@ -888,11 +910,16 @@ void uv__io_start(uv_loop_t* loop, uv__io_t* w, unsigned int events) {
     return;
 #endif
 
+  // 如果 async io 观察队列为空
   if (QUEUE_EMPTY(&w->watcher_queue))
+    // 将 async io 插入到 loop 的观察队列中, 相当于什么都不操作
     QUEUE_INSERT_TAIL(&loop->watcher_queue, &w->watcher_queue);
 
+  // 如果 loop 中 wathers 没有 async io 的 fd
   if (loop->watchers[w->fd] == NULL) {
+    // 添加
     loop->watchers[w->fd] = w;
+    // 增加对应计数
     loop->nfds++;
   }
 }

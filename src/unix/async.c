@@ -50,10 +50,14 @@ int uv_async_init(uv_loop_t* loop, uv_async_t* handle, uv_async_cb async_cb) {
   if (err)
     return err;
 
+  // 初始化 async io 中的 handle, 并将 handle 加入 loop->handles 队列
   uv__handle_init(loop, (uv_handle_t*)handle, UV_ASYNC);
+  // 增加对应的回调函数
   handle->async_cb = async_cb;
+  // 设置 pending 初始值
   handle->pending = 0;
 
+  // 同时在 async_handles 中也加入
   QUEUE_INSERT_TAIL(&loop->async_handles, &handle->queue);
   uv__handle_start(handle);
 
@@ -215,14 +219,17 @@ static int uv__async_start(uv_loop_t* loop) {
   int pipefd[2];
   int err;
 
+  // default, 没有初始化,  如果 async 中的 epoll 没有进行初始化
   if (loop->async_io_watcher.fd != -1)
     return 0;
 
 #ifdef __linux__
+  // 初始化文件符
   err = eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
   if (err < 0)
     return UV__ERR(errno);
 
+  // TODO： 
   pipefd[0] = err;
   pipefd[1] = -1;
 #else
@@ -231,8 +238,11 @@ static int uv__async_start(uv_loop_t* loop) {
     return err;
 #endif
 
+  // async 初始化
+  // async io 初始化
   uv__io_init(&loop->async_io_watcher, uv__async_io, pipefd[0]);
   uv__io_start(loop, &loop->async_io_watcher, POLLIN);
+  // 设置 loop 中的 async_wfd
   loop->async_wfd = pipefd[1];
 
   return 0;

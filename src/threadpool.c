@@ -140,22 +140,30 @@ static void worker(void* arg) {
 
 
 static void post(QUEUE* q, enum uv__work_kind kind) {
+  // 加锁, 这个锁是全局锁
   uv_mutex_lock(&mutex);
+  // 如果任务是 slow_io
   if (kind == UV__WORK_SLOW_IO) {
     /* Insert into a separate queue. */
+    // 全局队列 slow_io_pending_wq
     QUEUE_INSERT_TAIL(&slow_io_pending_wq, q);
+    // 如果添加成功就解锁, 并放回, 让线程处理
     if (!QUEUE_EMPTY(&run_slow_work_message)) {
       /* Running slow I/O tasks is already scheduled => Nothing to do here.
          The worker that runs said other task will schedule this one as well. */
-      uv_mutex_unlock(&mutex);
+      uv_mutex_nluock(&mutex);
       return;
     }
     q = &run_slow_work_message;
   }
 
+  // 加入 work queue 队列中去
   QUEUE_INSERT_TAIL(&wq, q);
+  // 如果还有空闲线程
   if (idle_threads > 0)
+    // 发送信号执行
     uv_cond_signal(&cond);
+  // 最终都要进行解锁
   uv_mutex_unlock(&mutex);
 }
 
@@ -263,10 +271,13 @@ void uv__work_submit(uv_loop_t* loop,
                      enum uv__work_kind kind,
                      void (*work)(struct uv__work* w),
                      void (*done)(struct uv__work* w, int status)) {
+  // 保证 uv 是初始化过的
   uv_once(&once, init_once);
+  // 注册 work 上的相关信息
   w->loop = loop;
   w->work = work;
   w->done = done;
+  // 提交到队列中去
   post(&w->wq, kind);
 }
 

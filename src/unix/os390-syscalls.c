@@ -201,10 +201,13 @@ static void child_fork(void) {
 
 
 static void epoll_init(void) {
+  // 初始化全局 epoll 队列
   QUEUE_INIT(&global_epoll_queue);
+  // 全局 epoll 队列锁初始化
   if (uv_mutex_init(&global_epoll_lock))
     abort();
 
+  // fork 出一个新的进程
   if (pthread_atfork(&before_fork, &after_fork, &child_fork))
     abort();
 }
@@ -213,8 +216,10 @@ static void epoll_init(void) {
 uv__os390_epoll* epoll_create1(int flags) {
   uv__os390_epoll* lst;
 
+  // 申请空间
   lst = uv__malloc(sizeof(*lst));
   if (lst != NULL) {
+    // 初始化
     /* initialize list */
     lst->size = 0;
     lst->items = NULL;

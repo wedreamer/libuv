@@ -319,6 +319,7 @@ void uv__signal_loop_cleanup(uv_loop_t* loop) {
 int uv_signal_init(uv_loop_t* loop, uv_signal_t* handle) {
   int err;
 
+  // 初始化信号处理
   err = uv__signal_loop_once_init(loop);
   if (err)
     return err;

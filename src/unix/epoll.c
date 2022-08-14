@@ -25,6 +25,7 @@
 #include <sys/epoll.h>
 
 int uv__epoll_init(uv_loop_t* loop) {
+  // 创建 epoll
   int fd;
   fd = epoll_create1(O_CLOEXEC);
 
@@ -32,12 +33,14 @@ int uv__epoll_init(uv_loop_t* loop) {
    * or because it doesn't understand the O_CLOEXEC flag.
    */
   if (fd == -1 && (errno == ENOSYS || errno == EINVAL)) {
+    // 可能失败, 因为内核比较老
     fd = epoll_create(256);
 
     if (fd != -1)
       uv__cloexec(fd, 1);
   }
 
+  // loop 中的 backend_fd 保存了 epoll fd
   loop->backend_fd = fd;
   if (fd == -1)
     return UV__ERR(errno);
@@ -153,6 +156,7 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
     e.events = w->pevents;
     e.data.fd = w->fd;
 
+    // events 第一次注册
     if (w->events == 0)
       op = EPOLL_CTL_ADD;
     else
@@ -161,6 +165,8 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
     /* XXX Future optimization: do EPOLL_CTL_MOD lazily if we stop watching
      * events, skip the syscall and squelch the events after epoll_wait().
      */
+    // 懒注册, 当运行的时候才注册
+    // 先添加, 再注册变更
     if (epoll_ctl(loop->backend_fd, op, w->fd, &e)) {
       if (errno != EEXIST)
         abort();
@@ -233,6 +239,8 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
         no_epoll_pwait = 1;
       }
     } else {
+      // 回 0 表示已超时。如果返回 –1，则表示出现错误，需要检查 errno 错误码判断错误类型
+      // 返回需要处理的事件数目
       nfds = epoll_wait(loop->backend_fd,
                         events,
                         ARRAY_SIZE(events),
@@ -270,6 +278,7 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
       /* We may have been inside the system call for longer than |timeout|
        * milliseconds so we need to update the timestamp to avoid drift.
        */
+      // 更新 loop 的 timeout
       goto update_timeout;
     }
 
@@ -314,8 +323,10 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
       loop->watchers[loop->nwatchers + 1] = (void*) (uintptr_t) nfds;
     }
 
+    // 处理收到的事件
     for (i = 0; i < nfds; i++) {
       pe = events + i;
+      // 事件对应的 fd
       fd = pe->data.fd;
 
       /* Skip invalidated events, see uv__platform_invalidate_fd */
@@ -325,8 +336,10 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
       assert(fd >= 0);
       assert((unsigned) fd < loop->nwatchers);
 
+      // fd 对应的观察者
       w = loop->watchers[fd];
 
+      // 如果没有观察者, 则说明被删除, 后续无需再处理
       if (w == NULL) {
         /* File descriptor that we've stopped watching, disarm it.
          *
@@ -359,10 +372,12 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
        * needs to remember the error/hangup event.  We should get that for
        * free when we switch over to edge-triggered I/O.
        */
+      // 错误处理
       if (pe->events == POLLERR || pe->events == POLLHUP)
         pe->events |=
           w->pevents & (POLLIN | POLLOUT | UV__POLLRDHUP | UV__POLLPRI);
 
+      // 有效的事件
       if (pe->events != 0) {
         /* Run signal watchers last.  This also affects child process watchers
          * because those are implemented in terms of signal watchers.
@@ -370,7 +385,9 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
         if (w == &loop->signal_io_watcher) {
           have_signals = 1;
         } else {
+          // TODO：
           uv__metrics_update_idle_time(loop);
+          // 回调事件
           w->cb(loop, w, pe->events);
         }
 

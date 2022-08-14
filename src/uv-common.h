@@ -191,8 +191,11 @@ void uv__fs_poll_close(uv_fs_poll_t* handle);
 int uv__getaddrinfo_translate_error(int sys_err);    /* EAI_* error. */
 
 enum uv__work_kind {
+  // cpu work
   UV__WORK_CPU,
+  // fast io
   UV__WORK_FAST_IO,
+  // slow io
   UV__WORK_SLOW_IO
 };
 
@@ -313,6 +316,7 @@ void uv__threadpool_cleanup(void);
     (h)->loop = (loop_);                                                      \
     (h)->type = (type_);                                                      \
     (h)->flags = UV_HANDLE_REF;  /* Ref the loop when active. */              \
+    /* 将 handle_queue 加入到 loop->handles 链表中 */                            \
     QUEUE_INSERT_TAIL(&(loop_)->handle_queue, &(h)->handle_queue);            \
     uv__handle_platform_init(h);                                              \
   }                                                                           \

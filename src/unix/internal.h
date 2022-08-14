@@ -137,7 +137,9 @@ typedef struct uv__stream_queued_fds_s uv__stream_queued_fds_t;
 
 /* loop flags */
 enum {
+  // uv_loop_block_sigprof
   UV_LOOP_BLOCK_SIGPROF = 0x1,
+  // uv_loop_reap_children
   UV_LOOP_REAP_CHILDREN = 0x2
 };
 
