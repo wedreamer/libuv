@@ -1593,7 +1593,9 @@ UV_EXTERN int uv_fs_poll_getpath(uv_fs_poll_t* handle,
 
 struct uv_signal_s {
   UV_HANDLE_FIELDS
+  // 信号回调函数
   uv_signal_cb signal_cb;
+  // 信号数值
   int signum;
   UV_SIGNAL_PRIVATE_FIELDS
 };

@@ -46,6 +46,7 @@
   }                                                                           \
                                                                               \
   void uv__run_##name(uv_loop_t* loop) {                                      \
+    /* 指定 handles 队列 copy 到 queue 中去, 拿到每一个元素, 然后拿到对应 handle 执行对应回调  */\
     uv_##name##_t* h;                                                         \
     QUEUE queue;                                                              \
     QUEUE* q;                                                                 \

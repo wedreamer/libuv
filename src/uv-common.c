@@ -777,6 +777,7 @@ static uv_loop_t* default_loop_ptr;
 
 
 uv_loop_t* uv_default_loop(void) {
+  // 全局静态变量, 保证 uv_default_loop 只会被初始化一次
   if (default_loop_ptr != NULL)
     return default_loop_ptr;
 
@@ -784,6 +785,7 @@ uv_loop_t* uv_default_loop(void) {
   if (uv_loop_init(&default_loop_struct))
     return NULL;
 
+  // 对应的指针, 也是全局静态变量, 方便访问, 避免 struct 的冗余拷贝
   default_loop_ptr = &default_loop_struct;
   return default_loop_ptr;
 }

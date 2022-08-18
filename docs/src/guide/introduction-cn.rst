@@ -16,18 +16,18 @@
 
 1) 系统程序员，创建低级程序，如守护进程或网络服务和客户。 您发现事件循环方法很好适合您的应用程序并决定使用 libuv.
 
-2) 想要封装平台 API 的 node.js 模块编写者用 C 或 C++ 编写，带有一组 (a) 同步 API，这些 API 暴露于 JavaScript。 您将纯粹在 node.js 的上下文中使用 libuv。 为了这你将需要一些其他资源，因为这本书不包括部分特定于 v8/node.js.
+2) 想要封装平台 API 的 node.js 模块编写者用 C 或 C++ 编写，带有一组 (a) 同步 API, 这些 API 暴露于 JavaScript。 您将纯粹在 node.js 的上下文中使用 libuv。 为了这你将需要一些其他资源，因为这本书不包括部分特定于 v8/node.js.
 
 本书假定您熟悉 C 编程语言。
 
 背景
 ----------
 
-node.js_ 项目始于 2009 年，作为一个解耦的 JavaScript 环境从浏览器。 使用 Google 的 V8_ 和 Marc Lehmann 的 libev_、node.js将 I/O 模型（事件）与非常适合的语言相结合编程风格； 由于它被浏览器塑造的方式。 作为 node.js 越来越受欢迎，让它在 Windows 上运行很重要，但是 libev 仅在 Unix 上运行。 内核事件通知的 Windows 等效项像 kqueue 或 (e)poll 这样的机制就是 IOCP。 libuv 是围绕 libev 的抽象或 IOCP 取决于平台，为用户提供基于 libev 的 API。在 libuv 的 node-v0.9.0 版本中，`libev 已被移除`_。
+node.js_ 项目始于 2009 年，作为一个解耦的 JavaScript 环境从浏览器。 使用 Google 的 V8_ 和 Marc Lehmann 的 libev_, node.js将 I/O 模型（事件）与非常适合的语言相结合编程风格； 由于它被浏览器塑造的方式。 作为 node.js 越来越受欢迎，让它在 Windows 上运行很重要，但是 libev 仅在 Unix 上运行。 内核事件通知的 Windows 等效项像 kqueue 或 (e)poll 这样的机制就是 IOCP. libuv 是围绕 libev 的抽象或 IOCP 取决于平台，为用户提供基于 libev 的 API。在 libuv 的 node-v0.9.0 版本中，`libev 已被移除`_。
 
 此后 libuv 不断成熟，成为一个高质量的独立用于系统编程的库。 node.js 之外的用户包括 Mozilla 的 Rust_ 编程语言和多种语言绑定。
 
-本书及代码基于libuv版本`v1.42.0`_。
+本书及代码基于 libuv 版本`v1.42.0`_。
 
 代码
 ----
@@ -39,7 +39,7 @@ node.js_ 项目始于 2009 年，作为一个解耦的 JavaScript 环境从浏�
     ./configure
     make
 
-不需要“make install”。 要构建示例，请在 ``docs/code/`` 目录。
+不需要 "make install"。 要构建示例，请在 ``docs/code/`` 目录。
 
 .. _v1.42.0: https://github.com/libuv/libuv/releases/tag/v1.42.0
 .. _V8: https://v8.dev

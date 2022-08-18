@@ -27,6 +27,7 @@
 int uv__epoll_init(uv_loop_t* loop) {
   // 创建 epoll
   int fd;
+  // 优先调用这个 epoll_create1
   fd = epoll_create1(O_CLOEXEC);
 
   /* epoll_create1() can fail either because it's not implemented (old kernel)
@@ -34,6 +35,7 @@ int uv__epoll_init(uv_loop_t* loop) {
    */
   if (fd == -1 && (errno == ENOSYS || errno == EINVAL)) {
     // 可能失败, 因为内核比较老
+    // 直接调用内核的 epoll_create
     fd = epoll_create(256);
 
     if (fd != -1)
@@ -112,6 +114,11 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
    * the value of CONFIG_HZ.  The magic constant assumes CONFIG_HZ=1200,
    * that being the largest value I have seen in the wild (and only once.)
    */
+  /**
+   * 内核 < 2.6.37 中的一个错误使得超时大于约 30 分钟在 32 位架构上实际上是无限的。为了避免无限期阻塞，我们限制超时并在必要时再次轮询.
+   *
+   * 请注意，"30 分钟" 是一种简化，因为它取决于 CONFIG_HZ 的值。魔法常数假定 CONFIG_HZ=1200，这是我在野外见过的最大值（而且只有一次。）
+   */
   static const int max_safe_timeout = 1789569;
   static int no_epoll_pwait_cached;
   static int no_epoll_wait_cached;
@@ -165,6 +172,9 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
     /* XXX Future optimization: do EPOLL_CTL_MOD lazily if we stop watching
      * events, skip the syscall and squelch the events after epoll_wait().
      */
+    /**
+     * 未来优化：如果我们停止观察事件，则懒惰地执行 EPOLL_CTL_MOD，跳过系统调用并在 epoll_wait() 之后静默事件。
+     */
     // 懒注册, 当运行的时候才注册
     // 先添加, 再注册变更
     if (epoll_ctl(loop->backend_fd, op, w->fd, &e)) {
@@ -174,6 +184,7 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
       assert(op == EPOLL_CTL_ADD);
 
       /* We've reactivated a file descriptor that's been watched before. */
+      // 我们重新激活了一个之前被观察过的文件描述符。
       if (epoll_ctl(loop->backend_fd, EPOLL_CTL_MOD, w->fd, &e))
         abort();
     }
@@ -208,6 +219,9 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
    * could have been avoided because another thread already knows
    * they fail with ENOSYS. Hardly the end of the world.
    */
+  /**
+   * 您可能会争辩说这两者之间存在依赖关系，但最终我们并不关心它们相对于彼此的顺序。最坏的情况是，我们进行了一些本来可以避免的系统调用，因为另一个线程已经知道它们因 ENOSYS 而失败。几乎没有世界末日。
+   */
   no_epoll_pwait = uv__load_relaxed(&no_epoll_pwait_cached);
   no_epoll_wait = uv__load_relaxed(&no_epoll_wait_cached);
 
@@ -215,11 +229,16 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
     /* Only need to set the provider_entry_time if timeout != 0. The function
      * will return early if the loop isn't configured with UV_METRICS_IDLE_TIME.
      */
+    /**
+     * 如果 timeout != 0 只需要设置 provider_entry_time。如果循环没有配置 UV_METRICS_IDLE_TIME，该函数将提前返回。
+     */
     if (timeout != 0)
       uv__metrics_set_provider_entry_time(loop);
 
     /* See the comment for max_safe_timeout for an explanation of why
      * this is necessary.  Executive summary: kernel bug workaround.
+     */
+    /* 请参阅 max_safe_timeout 的注释，了解为什么这是必要的。执行摘要：内核错误解决方法。
      */
     if (sizeof(int32_t) == sizeof(long) && timeout >= max_safe_timeout)
       timeout = max_safe_timeout;
@@ -259,6 +278,8 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
      * timeout == 0 (i.e. non-blocking poll) but there is no guarantee that the
      * operating system didn't reschedule our process while in the syscall.
      */
+    /* 无条件更新 loop->time。当 timeout == 0（即非阻塞轮询）时跳过更新很诱人，但不能保证操作系统在系统调用中没有重新安排我们的进程。
+     */
     SAVE_ERRNO(uv__update_time(loop));
 
     if (nfds == 0) {
@@ -278,6 +299,8 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
       /* We may have been inside the system call for longer than |timeout|
        * milliseconds so we need to update the timestamp to avoid drift.
        */
+      /* 我们可能在系统调用中的时间超过 |timeout| 毫秒，所以我们需要更新时间戳以避免漂移。
+       */
       // 更新 loop 的 timeout
       goto update_timeout;
     }
@@ -285,6 +308,7 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
     if (nfds == -1) {
       if (errno == ENOSYS) {
         /* epoll_wait() or epoll_pwait() failed, try the other system call. */
+        /* epoll_wait() 或 epoll_pwait() 失败，尝试其他系统调用。*/
         assert(no_epoll_wait == 0 || no_epoll_pwait == 0);
         continue;
       }
@@ -304,6 +328,7 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
         return;
 
       /* Interrupted by a signal. Update timeout and poll again. */
+      /* 被信号打断。更新超时并再次轮询。 */
       goto update_timeout;
     }
 
@@ -312,6 +337,7 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
 
     {
       /* Squelch a -Waddress-of-packed-member warning with gcc >= 9. */
+      /* 使用 gcc >= 9 消除 -Waddress-of-packed-member 警告。*/
       union {
         struct epoll_event* events;
         uv__io_t* watchers;
@@ -330,6 +356,7 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
       fd = pe->data.fd;
 
       /* Skip invalidated events, see uv__platform_invalidate_fd */
+      /* 跳过无效事件，参见 uv__platform_invalidate_fd*/
       if (fd == -1)
         continue;
 
@@ -346,6 +373,10 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
          * Ignore all errors because we may be racing with another thread
          * when the file descriptor is closed.
          */
+        /* 我们已经停止观看的文件描述符，解除它。
+         *
+         * 忽略所有错误，因为当文件描述符关闭时，我们可能正在与另一个线程竞争。
+         */
         epoll_ctl(loop->backend_fd, EPOLL_CTL_DEL, fd, pe);
         continue;
       }
@@ -354,6 +385,8 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
        * callbacks when previous callback invocation in this loop has stopped
        * the current watcher. Also, filters out events that users has not
        * requested us to watch.
+       */
+      /* 仅向用户提供他们感兴趣的事件。当此循环中的先前回调调用停止当前观察者时，防止虚假回调。此外，过滤掉用户没有要求我们观看的事件。
        */
       pe->events &= w->pevents | POLLERR | POLLHUP;
 
@@ -372,6 +405,10 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
        * needs to remember the error/hangup event.  We should get that for
        * free when we switch over to edge-triggered I/O.
        */
+      /* 解决一个 epoll 怪癖，它有时只报告 EPOLLERR 或 EPOLLHUP 事件。为了强制事件循环往前走，我们合并了观察者感兴趣的读/写事件；然后 uv__read() 和 uv__write() 将以通常的方式处理错误或挂断。
+       *
+       * 自我注意：当 epoll 报告 EPOLLIN|EPOLLHUP 时发生，用户读取可用数据，调用 uv_read_stop()，然后稍后再次调用 uv_read_start()。到那时，libuv 已经忘记了挂断，内核不会再次报告 EPOLLIN，因为没有什么可读的了。如果有的话，libuv 是罪魁祸首。当前的 hack 只是一个快速的创可贴。为了正确修复它，libuv 需要记住错误/挂断事件。当我们切换到边缘触发的 I/O 时，我们应该免费获得它。
+       */
       // 错误处理
       if (pe->events == POLLERR || pe->events == POLLHUP)
         pe->events |=
@@ -381,6 +418,8 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
       if (pe->events != 0) {
         /* Run signal watchers last.  This also affects child process watchers
          * because those are implemented in terms of signal watchers.
+         */
+        /* 最后运行信号观察器。这也会影响子进程观察者，因为它们是根据信号观察者实现的。
          */
         if (w == &loop->signal_io_watcher) {
           have_signals = 1;

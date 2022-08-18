@@ -383,6 +383,7 @@ int uv_pipe_chmod(uv_pipe_t* handle, int mode) {
 }
 
 
+// TODO:
 int uv_pipe(uv_os_fd_t fds[2], int read_flags, int write_flags) {
   uv_os_fd_t temp[2];
   int err;
@@ -431,6 +432,7 @@ fail:
 
 
 int uv__make_pipe(int fds[2], int flags) {
+  // 创建 read/write 非阻塞的 pip
   return uv_pipe(fds,
                  flags & UV_NONBLOCK_PIPE,
                  flags & UV_NONBLOCK_PIPE);

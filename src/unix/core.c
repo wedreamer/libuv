@@ -349,7 +349,14 @@ int uv_backend_fd(const uv_loop_t* loop) {
 
 static int uv__loop_alive(const uv_loop_t* loop) {
   // active_handles active_reqs pending_queue 
-  return uv__has_active_handles(loop) ||closing_handles
+  // 判断 loop 是否存活的条件
+  /**
+   * 1. loop->active_handles > 0
+   * 2. loop->active_reqs.count > 0
+   * 3. loop->pending_queue empty
+   * 4. loop->closing_handles 正在执行
+   */
+  return uv__has_active_handles(loop) ||
          uv__has_active_reqs(loop) ||
          !QUEUE_EMPTY(&loop->pending_queue) ||
          loop->closing_handles != NULL;
@@ -392,22 +399,26 @@ int uv_run(uv_loop_t* loop, uv_run_mode mode) {
     uv__update_time(loop);
 
   // loop 存活
+  // loop 存活, 并且此时 stop_flag 等于 0
   while (r != 0 && loop->stop_flag == 0) {
+    // 如果 stop_flag 等于 0, 并不意味着 loop 不存活
     // 更新时间
     uv__update_time(loop);
+    // 执行定时器
     uv__run_timers(loop);
 
     // 如果 pending_queue 和 idle_handles 都为空, 则睡觉, 空转
     can_sleep =
         QUEUE_EMPTY(&loop->pending_queue) && QUEUE_EMPTY(&loop->idle_handles);
 
-    // 运行 pending 
+    // 运行 pending, 执行 pending 中每个元素对应的 uv__io_t 的回调, 直接消费
     uv__run_pending(loop);
-    // 运行 idle
+    // 运行 idle, 执行 idle_queue 中每个元素对应的 uv_idle_t 的 idle_cb, 循环消费
     uv__run_idle(loop);
-    // 运行 prepare
+    // 运行 prepare, 执行 prepare_queue 中每个元素对应的 uv_prepare_t 的 prepare_cb, 循环消费
     uv__run_prepare(loop);
 
+    // 重置
     timeout = 0;
     // 如果可以睡觉, 且只执行一次或者是默认模式执行
     if ((mode == UV_RUN_ONCE && can_sleep) || mode == UV_RUN_DEFAULT)
@@ -419,7 +430,7 @@ int uv_run(uv_loop_t* loop, uv_run_mode mode) {
 
     /* Process immediate callbacks (e.g. write_cb) a small fixed number of
      * times to avoid loop starvation.*/
-    // 处理即时回调（例如write_cb）少量固定次数，以避免循环饥饿
+    // 处理即时回调（例如 write_cb ）少量固定次数，以避免循环饥饿
     // 这里循环了 8 次
     for (r = 0; r < 8 && !QUEUE_EMPTY(&loop->pending_queue); r++)
       uv__run_pending(loop);
@@ -821,14 +832,18 @@ static void uv__run_pending(uv_loop_t* loop) {
   QUEUE_MOVE(&loop->pending_queue, &pq);
 
   // 这里和 uv__run_idle uv__run_check uv__run_prepare 有区别
+  // 这里是执行的 uv__io_t 的回调
   // 如果 pq 不为空, 则意味着有事件处理
   while (!QUEUE_EMPTY(&pq)) {
-    // header
+    // pq 的 header 即使 queue
     q = QUEUE_HEAD(&pq);
+    // 获取头一个元素
     QUEUE_REMOVE(q);
+    // 初始化 queue
     QUEUE_INIT(q);
+    // 拿到这个元素的 wathcer
     w = QUEUE_DATA(q, uv__io_t, pending_queue);
-    // 调用回调函数
+    // 调用 watcher 回调函数, 查看是否可写
     w->cb(loop, w, POLLOUT);
   }
 }
@@ -883,16 +898,21 @@ static void maybe_resize(uv_loop_t* loop, unsigned int len) {
 void uv__io_init(uv__io_t* w, uv__io_cb cb, int fd) {
   assert(cb != NULL);
   assert(fd >= -1);
+  // 初始化 watcher 的 pending_queue
+  // 初始化 watcher 的 watcher_queue
   QUEUE_INIT(&w->pending_queue);
   QUEUE_INIT(&w->watcher_queue);
+  // 设置回调, 以及管道符号
   w->cb = cb;
   w->fd = fd;
+  // 设置事件
   w->events = 0;
   w->pevents = 0;
 }
 
 // POLLPRI, POLLIN 可读 POLLOUT 可写 POLLRDHUP 关闭
 void uv__io_start(uv_loop_t* loop, uv__io_t* w, unsigned int events) {
+  // 设置 loop 上 watcher 的事件
   assert(0 == (events & ~(POLLIN | POLLOUT | UV__POLLRDHUP | UV__POLLPRI)));
   assert(0 != events);
   assert(w->fd >= 0);

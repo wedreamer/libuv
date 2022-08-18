@@ -181,10 +181,12 @@ static void child_fork(void) {
   QUEUE* q;
   uv_once_t child_once = UV_ONCE_INIT;
 
+  // 将全局变量 once 设置为 UV_ONCE_INIT
   /* reset once */
   memcpy(&once, &child_once, sizeof(child_once));
 
   /* reset epoll list */
+  // 不空则意味着在初始化过程中已经有事件发生
   while (!QUEUE_EMPTY(&global_epoll_queue)) {
     uv__os390_epoll* lst;
     q = QUEUE_HEAD(&global_epoll_queue);
@@ -195,7 +197,9 @@ static void child_fork(void) {
     lst->size = 0;
   }
 
+  // 解锁
   uv_mutex_unlock(&global_epoll_lock);
+  // 销毁, 只需要初始化一次就不需要了
   uv_mutex_destroy(&global_epoll_lock);
 }
 
@@ -207,7 +211,7 @@ static void epoll_init(void) {
   if (uv_mutex_init(&global_epoll_lock))
     abort();
 
-  // fork 出一个新的进程
+  // fork 出一个新的进程, fork 之前加锁, fork 之后解锁
   if (pthread_atfork(&before_fork, &after_fork, &child_fork))
     abort();
 }
@@ -225,11 +229,14 @@ uv__os390_epoll* epoll_create1(int flags) {
     lst->items = NULL;
     init_message_queue(lst);
     maybe_resize(lst, 1);
+    // 第一个 item 的 fd 是消息队列 ??
     lst->items[lst->size - 1].fd = lst->msg_queue;
     lst->items[lst->size - 1].events = POLLIN;
     lst->items[lst->size - 1].revents = 0;
+    // 保证当前线程至少有一个 epoll 句柄
     uv_once(&once, epoll_init);
     uv_mutex_lock(&global_epoll_lock);
+    // 将 lst->member 插入到 global_epoll_queue
     QUEUE_INSERT_TAIL(&global_epoll_queue, &lst->member);
     uv_mutex_unlock(&global_epoll_lock);
   }

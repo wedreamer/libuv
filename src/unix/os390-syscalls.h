@@ -45,9 +45,13 @@ struct epoll_event {
 };
 
 typedef struct {
+  // 队列
   QUEUE member;
+  // 文件描述符数组
   struct pollfd* items;
+  // 大小
   unsigned long size;
+  // 消息队列
   int msg_queue;
 } uv__os390_epoll;
 

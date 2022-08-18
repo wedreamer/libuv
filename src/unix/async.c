@@ -46,6 +46,7 @@ static void uv__cpu_relax(void);
 int uv_async_init(uv_loop_t* loop, uv_async_t* handle, uv_async_cb async_cb) {
   int err;
 
+  // async 启动
   err = uv__async_start(loop);
   if (err)
     return err;
@@ -225,12 +226,16 @@ static int uv__async_start(uv_loop_t* loop) {
 
 #ifdef __linux__
   // 初始化文件符
+  // 返回通用事件通道的文件描述符。将初始值设置为 COUNT。
   err = eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
   if (err < 0)
     return UV__ERR(errno);
 
+  // 设置管道
   // TODO： 
+  // async_io_watcher.fd
   pipefd[0] = err;
+  // loop->async_wfd
   pipefd[1] = -1;
 #else
   err = uv__make_pipe(pipefd, UV_NONBLOCK_PIPE);

@@ -100,9 +100,11 @@ void uv__signal_cleanup(void) {
 static void uv__signal_global_reinit(void) {
   uv__signal_cleanup();
 
+  // 创建 pipe
   if (uv__make_pipe(uv__signal_lock_pipefd, 0))
     abort();
 
+  // 解锁
   if (uv__signal_unlock())
     abort();
 }
@@ -324,7 +326,9 @@ int uv_signal_init(uv_loop_t* loop, uv_signal_t* handle) {
   if (err)
     return err;
 
+  // handle 初始化
   uv__handle_init(loop, (uv_handle_t*) handle, UV_SIGNAL);
+  // TODO： 
   handle->signum = 0;
   handle->caught_signals = 0;
   handle->dispatched_signals = 0;
