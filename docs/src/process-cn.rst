@@ -4,7 +4,7 @@
 :c:type:`uv_process_t` --- Process handle
 =========================================
 
-流程处理将产生一个新的过程，并允许用户控制它并使用流来建立通信渠道.
+流程处理将产生一个新的过程, 并允许用户控制它并使用流来建立通信通道.
 
 
 Data types
@@ -35,11 +35,11 @@ Data types
 
 .. c:type:: void (*uv_exit_cb)(uv_process_t*, int64_t exit_status, int term_signal)
 
-    输入回调的类型定义传递在：c：类型：`uv_process_options_t`中，将指示导致该过程终止的退出状态和信号, 如果有的话.
+    输入回调的类型定义传递在： c:type: `uv_process_options_t`中，将指示导致该过程终止的退出状态和信号, 如果有的话.
 
 .. c:type:: uv_process_flags
 
-    标志要在：c：type：`uv_process_options_t`的标志字段上设置.
+    标志要在: c:type:`uv_process_options_t`的标志字段上设置.
 
     ::
 
@@ -177,11 +177,11 @@ Public members
 
 .. c:member:: char** uv_process_options_t.args
 
-    命令行参数。 args[0] 应该是程序的路径。在 Windows 上，它使用 `CreateProcess` 将参数连接成一个字符串，这可能会导致一些奇怪的错误。请参阅 :c:type:`uv_process_flags 上的 `UV_PROCESS_WINDOWS_VERBATIM_ARGUMENTS` 标志.
+    命令行参数。 args[0] 应该是程序的路径。在 Windows 上，它使用 `CreateProcess` 将参数连接成一个字符串，这可能会导致一些奇怪的错误。请参阅 :c:type:`uv_process_flags 上的   `UV_PROCESS_WINDOWS_VERBATIM_ARGUMENTS` 标志.
 
 .. c:member:: char** uv_process_options_t.env
 
-    新流程的环境。如果为 NULL，则使用了父进程环境.
+    新流程的环境。如果为 NULL, 则使用了父进程环境.
 
 .. c:member:: const char* uv_process_options_t.cwd
 
@@ -194,7 +194,7 @@ Public members
 .. c:member:: int uv_process_options_t.stdio_count
 .. c:member:: uv_stdio_container_t* uv_process_options_t.stdio
 
-    `stdio` 字段指向 :c:type:`uv_stdio_container_t` 结构的数组，这些结构描述了子进程可用的文件描述符。约定是stdio[0]指向stdin，fd 1 用于stdout，fd 2 是stderr。
+    `stdio` 字段指向 :c:type:`uv_stdio_container_t` 结构的数组, 这些结构描述了子进程可用的文件描述符。约定是stdio[0]指向stdin, fd 1 用于 stdout, fd 2 是 stderr。
 
     .. note::
         在 Windows 上，只有当子进程使用 MSVCRT 运行时，大于 2 的文件描述符才可用于子进程.
@@ -230,7 +230,7 @@ API
 
 .. c:function:: int uv_spawn(uv_loop_t* loop, uv_process_t* handle, const uv_process_options_t* options)
 
-    初始化进程句柄并启动进程。如果进程成功生成，此函数将返回 0。否则，返回与它无法生成的原因相对应的负错误代码.
+    初始化进程句柄并启动进程。如果进程成功生成，此函数将返回 0。否则, 返回与它无法生成的原因相对应的负错误代码.
 
     未能生成的可能原因包括（但不限于）要执行的文件不存在，没有使用指定的 setuid 或 setgid 的权限，或者没有足够的内存来为新进程分配.
 

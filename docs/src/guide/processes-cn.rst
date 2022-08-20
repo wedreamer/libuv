@@ -1,7 +1,7 @@
 进程
 =========
 
-libuv 提供了相当多的子进程管理，抽象了平台差异并允许使用流或命名管道与子进程进行通信。
+libuv 提供了相当多的子进程管理, 抽象了平台差异并允许使用流或命名管道与子进程进行通信。
 
 Unix 中的一个常见习语是每个进程都做一件事并且做得很好。 在这种情况下，一个进程通常会使用多个子进程来完成任务（类似于在 shell 中使用管道）。 与具有线程和共享内存的多进程模型相比，具有消息的多进程模型也可能更容易推理。
 
@@ -21,13 +21,13 @@ Unix 中的一个常见习语是每个进程都做一件事并且做得很好。
 
 .. NOTE::
 
-    ``options`` 被隐式初始化为零，因为它是一个全局变量。 如果您将“选项”更改为局部变量，请记住将其初始化为空出所有未使用的字段::
+    ``options`` 被隐式初始化为零，因为它是一个全局变量。 如果您将 "选项" 更改为局部变量, 请记住将其初始化为空出所有未使用的字段::
 
         uv_process_options_t options = {0};
 
-`uv_process_t` 结构仅充当句柄，所有选项都通过 `uv_process_options_t` 设置。 要简单地启动一个进程，您只需要设置 ``file`` 和 ``args`` 字段。 ``file`` 是要执行的程序。 由于 `uv_spawn` 在内部使用 :man:`execvp(3)`，因此无需提供完整路径。 最后，根据基本约定，**参数数组必须比参数数量大一，最后一个元素为 NULL**
+`uv_process_t` 结构仅充当句柄，所有选项都通过 `uv_process_options_t` 设置。 要简单地启动一个进程，您只需要设置 ``file`` 和 ``args`` 字段。 ``file`` 是要执行的程序。 由于 `uv_spawn` 在内部使用 :man:`execvp(3)`，因此无需提供完整路径。 最后，根据基本约定， **参数数组必须比参数数量大一，最后一个元素为 NULL**
 
-在调用 `uv_spawn` 之后，`uv_process_t.pid` 将包含子进程的进程 ID.
+在调用 `uv_spawn` 之后， `uv_process_t.pid` 将包含子进程的进程 ID.
 
 将使用 *exit status* 和导致退出的 *signal* 类型调用退出回调.
 
@@ -63,7 +63,7 @@ Unix 中的一个常见习语是每个进程都做一件事并且做得很好。
 * ``UV_PROCESS_SETUID`` - sets the child's execution user ID to ``uv_process_options_t.uid``.
 * ``UV_PROCESS_SETGID`` - sets the child's execution group ID to ``uv_process_options_t.gid``.
 
-仅在 Unix 上支持更改 UID/GID，在 Windows 上 `uv_spawn` 将失败并使用 `UV_ENOTSUP`。
+仅在 Unix 上支持更改 UID/GID, 在 Windows 上 `uv_spawn` 将失败并使用 `UV_ENOTSUP`。
 
 * ``UV_PROCESS_WINDOWS_VERBATIM_ARGUMENTS`` - 在 Windows 上不会对 `uv_process_options_t.args` 进行引用或转义。 在 Unix 上被忽略.
 * ``UV_PROCESS_DETACHED`` - 在新会话中启动子进程，该会话将在父进程退出后继续运行。 请参阅下面的示例.
@@ -85,11 +85,11 @@ Unix 中的一个常见习语是每个进程都做一件事并且做得很好。
 向进程发信号
 ----------------------------
 
-libuv 包装了 Unix 上的标准 ``kill(2)`` 系统调用，并在 Windows 上实现了一个具有相似语义的系统调用，但有一个警告*：所有 ``SIGTERM``、``SIGINT`` 和 ``SIGKILL`` ，导致进程终止。 `uv_kill` 的签名是::
+libuv 包装了 Unix 上的标准 ``kill(2)`` 系统调用，并在 Windows 上实现了一个具有相似语义的系统调用，但有一个警告：所有 ``SIGTERM``、 ``SIGINT`` 和 ``SIGKILL`` ，导致进程终止。 `uv_kill` 的签名是::
 
     uv_err_t uv_kill(int pid, int signum);
 
-对于使用 libuv 启动的进程，您可以使用 ``uv_process_kill`` 代替，它接受 ``uv_process_t`` 作为第一个参数，而不是 pid。 在这种情况下，**记得在观察者上调用** `uv_close`.
+对于使用 libuv 启动的进程，您可以使用 ``uv_process_kill`` 代替，它接受 ``uv_process_t`` 作为第一个参数，而不是 pid。 在这种情况下， **记得在观察者上调用** `uv_close`.
 
 信号
 -------
@@ -106,14 +106,14 @@ libuv 还提供了 Unix 信号的包装器，并带有 `一些 Windows 支持 <h
 
 .. NOTE::
 
-    `uv_run(loop, UV_RUN_NOWAIT)` 类似于 `uv_run(loop, UV_RUN_ONCE)`，因为它只处理一个事件。 如果没有未决事件，UV_RUN_ONCE 会阻塞，而 UV_RUN_NOWAIT 将立即返回。 我们使用NOWAIT，这样一个循环就不会因为另一个没有待处理的活动而被饿死.
+    `uv_run(loop, UV_RUN_NOWAIT)` 类似于 `uv_run(loop, UV_RUN_ONCE)`，因为它只处理一个事件。 如果没有未决事件, UV_RUN_ONCE 会阻塞，而 UV_RUN_NOWAIT 将立即返回。 我们使用NOWAIT, 这样一个循环就不会因为另一个没有待处理的活动而被饿死.
 
 向进程发送 `SIGUSR1`，您会发现处理程序被调用了 4 次，每个 `uv_signal_t` 调用一次。 处理程序只是停止每个句柄，以便程序退出。 这种对所有处理程序的分派非常有用。 使用多个事件循环的服务器可以确保在终止之前安全保存所有数据，只需通过每个循环添加一个 `SIGINT` 的观察者.
 
 子进程 IO
 -----------------
 
-一个正常的、新生成的进程有自己的一组文件描述符，0、1 和 2 分别是 `stdin`、 `stdout` 和 `stderr`。 有时您可能希望与孩子共享文件描述符。 例如，也许您的应用程序启动了一个子命令，并且您希望任何错误都进入日志文件，但忽略 ``stdout`` 。 为此，您希望子级的“stderr”与父级的 stderr 相同。 在这种情况下，libuv 支持 *inheriting* 文件描述符。 在这个示例中，我们调用了测试程序，即:
+一个正常的、新生成的进程有自己的一组文件描述符, 0、1 和 2 分别是 `stdin`、 `stdout` 和 `stderr`。 有时您可能希望与孩子共享文件描述符。 例如，也许您的应用程序启动了一个子命令，并且您希望任何错误都进入日志文件，但忽略 ``stdout`` 。 为此, 您希望子级的 "stderr" 与父级的 stderr 相同。 在这种情况下, libuv 支持 *inheriting* 文件描述符。 在这个示例中，我们调用了测试程序，即:
 
 .. rubric:: proc-streams/test.c
 .. literalinclude:: ../../code/proc-streams/test.c
@@ -173,7 +173,7 @@ CGI 服务器结合了本章的概念和 :doc:`networking` ，因此每个客户
     :lines: 16, 25-45
     :emphasize-lines: 8-9,18,20
 
-CGI 脚本的 `stdout` 被设置为套接字，这样无论我们的滴答脚本打印什么，都会被发送到客户端。 通过使用进程，我们可以将读/写缓冲卸载到操作系统，因此在方便方面这非常好。 请注意，创建流程是一项昂贵的任务.
+CGI 脚本的 `stdout` 被设置为套接字，这样无论我们的滴答脚本打印什么，都会被发送到客户端。 通过使用进程，我们可以将读/写缓冲卸载到操作系统，因此在方便方面这非常好。 请注意，创建进程是一项昂贵的任务.
 
 .. _pipes:
 
@@ -185,7 +185,7 @@ CGI 脚本的 `stdout` 被设置为套接字，这样无论我们的滴答脚本
 新的 stdio 管道
 +++++++++++++++
 
-`uv_pipe_t` 结构不仅仅代表 `pipe(7)`_ （或 `|`），还支持任何流文件类对象。 在 Windows 上，该描述的唯一对象是“命名管道”_。 在 Unix 上，它可以是任何 `Unix Domain Socket`_，或派生自 `mkfifo(1)`_，或者它实际上可以是 `pipe(7)`_。 当 `uv_spawn` 由于 `UV_CREATE_PIPE` 标志初始化 `uv_pipe_t` 时，它选择创建 `socketpair(2)`_.
+`uv_pipe_t` 结构不仅仅代表 `pipe(7)`_ （或 `|`），还支持任何流文件类对象。 在 Windows 上, 该描述的唯一对象是 "命名管道" _。 在 Unix 上，它可以是任何 `Unix Domain Socket`_, 或派生自 `mkfifo(1)`_, 或者它实际上可以是 `pipe(7)`_。 当 `uv_spawn` 由于 `UV_CREATE_PIPE` 标志初始化 `uv_pipe_t` 时，它选择创建 `socketpair(2)`_.
 
 这是为了允许多个 libuv 进程通过 IPC 通信。 这将在下面讨论.
 
@@ -251,7 +251,7 @@ worker 进程非常简单，因为文件描述符是由 master 交给它的.
 
 首先我们调用 uv_pipe_pending_count() 来确保有一个句柄可供读取。 如果您的程序可以处理不同类型的句柄，可以使用 uv_pipe_pending_type() 来确定类型。 尽管 ``accept`` 在这段代码中看起来很奇怪，但它实际上是有道理的。 ``accept`` 传统上所做的是从另一个文件描述符（侦听套接字）获取文件描述符（客户端）。 这正是我们在这里所做的。 从 ``queue`` 获取文件描述（ ``client`` ）。 从这一点开始，工人做标准的回声服务器的东西.
 
-现在转到 master，让我们看看如何启动 worker 以允许负载平衡.
+现在转到 master, 让我们看看如何启动 worker 以允许负载平衡.
 
 .. rubric:: multi-echo-server/main.c
 .. literalinclude:: ../../code/multi-echo-server/main.c
@@ -270,7 +270,7 @@ worker 进程非常简单，因为文件描述符是由 master 交给它的.
 
 在设置工人时，我们使用漂亮的 libuv 函数 uv_cpu_info 来获取 CPU 的数量，以便我们可以启动相同数量的工人。 同样重要的是初始化作为 IPC 通道的管道，第三个参数为 1。然后我们指出子进程的 `stdin` 是一个可读的管道（从子进程的角度来看）。 到这里为止，一切都很简单。 工作人员已启动并等待将文件描述符写入其标准输入.
 
-在 `on_new_connection` （TCP 基础设施在 `main()` 中初始化），我们接受客户端套接字并将其传递给循环中的下一个工作程序.
+在 `on_new_connection` (TCP 基础设施在 `main()` 中初始化)，我们接受客户端套接字并将其传递给循环中的下一个工作程序.
 
 .. rubric:: multi-echo-server/main.c
 .. literalinclude:: ../../code/multi-echo-server/main.c
@@ -279,7 +279,7 @@ worker 进程非常简单，因为文件描述符是由 master 交给它的.
     :lines: 31-49
     :emphasize-lines: 9,12-13
 
-`uv_write2` 调用处理所有的抽象，它只是将句柄（`client`）作为正确的参数传递的问题。 有了这个，我们的多进程回显服务器就可以运行了.
+`uv_write2` 调用处理所有的抽象，它只是将句柄（ `client` ）作为正确的参数传递的问题。 有了这个，我们的多进程回显服务器就可以运行了.
 
 感谢 Kyle 指出 `uv_write2()` 需要一个非空缓冲区，即使在发送句柄时也是如此.
 

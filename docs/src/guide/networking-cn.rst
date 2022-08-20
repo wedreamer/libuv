@@ -1,7 +1,7 @@
 网络
 ==========
 
-libuv 中的网络与直接使用 BSD 套接字没有太大区别接口，有些事情更容易，都是非阻塞的，但概念仍然存在相同。 此外，libuv 提供了实用功能来抽象烦人的，重复性和低级任务，例如使用 BSD 套接字设置套接字结构、DNS 查找和调整各种套接字参数。
+libuv 中的网络与直接使用 BSD 套接字没有太大区别接口，有些事情更容易，都是非阻塞的，但概念仍然存在相同。 此外, libuv 提供了实用功能来抽象烦人的，重复性和低级任务，例如使用 BSD 套接字设置套接字结构、DNS 查找和调整各种套接字参数。
 
 ``uv_tcp_t`` 和 ``uv_udp_t`` 结构用于网络 I/O。
 
@@ -73,7 +73,7 @@ Client
 UDP
 ---
 
-`用户数据报协议`_提供无连接、不可靠的网络通信。 因此 libuv 不提供流。 相反，libuv 通过 `uv_udp_t` 句柄（用于接收）和 `uv_udp_send_t` 请求（用于发送）和相关函数提供非阻塞 UDP 支持。 也就是说，用于读/写的实际 API 与普通流读取非常相似。 为了了解如何使用 UDP，该示例显示了从 `DHCP`_ 服务器获取 IP 地址的第一阶段——DHCP 发现.
+`用户数据报协议`_ 提供无连接、不可靠的网络通信。 因此 libuv 不提供流。 相反, libuv 通过 `uv_udp_t` 句柄（用于接收）和 `uv_udp_send_t` 请求（用于发送）和相关函数提供非阻塞 UDP 支持。 也就是说，用于读/写的实际 API 与普通流读取非常相似。 为了了解如何使用 UDP, 该示例显示了从 `DHCP`_ 服务器获取 IP 地址的第一阶段——DHCP 发现.
 
 .. note::
 
@@ -90,13 +90,13 @@ UDP
 
     IP 地址 `0.0.0.0` 用于绑定所有接口。 IP 地址 `255.255.255.255` 是一个广播地址，意味着数据包将被发送到子网上的所有接口。 端口 ``0`` 表示操作系统随机分配一个端口.
 
-首先，我们将接收套接字设置为绑定到端口 68（DHCP 客户端）上的所有接口并开始对其进行读取。 这将从任何回复的 DHCP 服务器读回响应。 我们使用 UV_UDP_REUSEADDR 标志与在同一端口上运行在这台计算机上的任何其他系统 DHCP 客户端配合使用。然后我们设置一个类似的发送套接字并使用 uv_udp_send 在端口 67（DHCP 服务器）上发送一个 *广播消息*。.
+首先，我们将接收套接字设置为绑定到端口 68(DHCP 客户端)上的所有接口并开始对其进行读取。 这将从任何回复的 DHCP 服务器读回响应。 我们使用 UV_UDP_REUSEADDR 标志与在同一端口上运行在这台计算机上的任何其他系统 DHCP 客户端配合使用。然后我们设置一个类似的发送套接字并使用 uv_udp_send 在端口 67(DHCP 服务器)上发送一个 *广播消息*。.
 
 **必须** 设置广播标志，否则你会得到一个 ``EACCES``错误[#]_。 发送的确切消息与本书无关，如果您有兴趣可以研究代码。 像往常一样，如果出现问题，读取和写入回调将收到 < 0 的状态代码。
 
 由于 UDP 套接字未连接到特定对等方，因此读取回调会接收有关数据包发送者的额外参数.
 
-如果没有更多数据要读取， `nread` 可能为零。 如果 ``addr`` 为 NULL，表示没有可读取的内容（回调不应该做任何事情），如果不为 NULL，则表示在 ``addr`` 处从主机接收到一个空数据报。 如果分配器提供的缓冲区不足以容纳数据，则 ``flags`` 参数可能是 ``UV_UDP_PARTIAL``。 *在这种情况下，操作系统将丢弃不适合的数据*（这就是你的 UDP！）.
+如果没有更多数据要读取， `nread` 可能为零。 如果 ``addr`` 为 NULL, 表示没有可读取的内容(回调不应该做任何事情)，如果不为 NULL, 则表示在 ``addr`` 处从主机接收到一个空数据报。 如果分配器提供的缓冲区不足以容纳数据，则 ``flags`` 参数可能是 ``UV_UDP_PARTIAL``。 *在这种情况下，操作系统将丢弃不适合的数据* (这就是你的 UDP！).
 
 .. rubric:: udp-dhcp/main.c - Reading packets
 .. literalinclude:: ../../code/udp-dhcp/main.c
@@ -116,7 +116,7 @@ UDP 配置
 仅 IPv6 堆栈
 ~~~~~~~~~~~~~~~
 
-IPv6 套接字可用于 IPv4 和 IPv6 通信。 如果您只想将套接字限制为 IPv6，请将 ``UV_UDP_IPV6ONLY`` 标志传递给 ``uv_udp_bind`` [#]_.
+IPv6 套接字可用于 IPv4 和 IPv6 通信。 如果您只想将套接字限制为 IPv6, 请将 ``UV_UDP_IPV6ONLY`` 标志传递给 ``uv_udp_bind`` [#]_.
 
 组播
 ~~~~~~~~~
@@ -133,14 +133,14 @@ where ``membership`` is ``UV_JOIN_GROUP`` or ``UV_LEAVE_GROUP``.
 
 .. _this guide: https://www.tldp.org/HOWTO/Multicast-HOWTO-2.html
 
-组播包本地环回默认开启[#]_，使用`uv_udp_set_multicast_loop`关闭.
+组播包本地环回默认开启[#]_ , 使用 `uv_udp_set_multicast_loop` 关闭.
 
 可以使用更改多播数据包的数据包生存时间 ``uv_udp_set_multicast_ttl``.
 
 查询 DNS
 ------------
 
-libuv 提供异步 DNS 解析。 为此，它提供了自己的 ``getaddrinfo`` 替代 [#]_。 在回调中，您可以对检索到的地址执行正常的套接字操作。 让我们连接到 Libera.chat 以查看 DNS 解析的示例.
+libuv 提供异步 DNS 解析。 为此, 它提供了自己的 ``getaddrinfo`` 替代 [#]_。 在回调中，您可以对检索到的地址执行正常的套接字操作。 让我们连接到 Libera.chat 以查看 DNS 解析的示例.
 
 .. rubric:: dns/main.c
 .. literalinclude:: ../../code/dns/main.c
@@ -149,7 +149,7 @@ libuv 提供异步 DNS 解析。 为此，它提供了自己的 ``getaddrinfo`` 
     :lines: 61-
     :emphasize-lines: 12
 
-如果 `uv_getaddrinfo` 返回非零，则设置中出现问题，您的回调根本不会被调用。 所有参数都可以在 uv_getaddrinfo 返回后立即释放。 `hostname`、`servname` 和 `hints` 结构记录在 `getaddrinfo 手册页 <getaddrinfo_>`_ 中。 回调可以是 ``NULL`` 在这种情况下函数将同步运行.
+如果 `uv_getaddrinfo` 返回非零，则设置中出现问题，您的回调根本不会被调用。 所有参数都可以在 uv_getaddrinfo 返回后立即释放。 `hostname`、 `servname` 和 `hints` 结构记录在 `getaddrinfo 手册页 <getaddrinfo_>`_ 中。 回调可以是 ``NULL`` 在这种情况下函数将同步运行.
 
 在解析器回调中，您可以从 struct addrinfo(s) 的链表中选择任何 IP。 这也演示了 `uv_tcp_connect`。 有必要在回调中调用 `uv_freeaddrinfo`.
 

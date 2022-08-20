@@ -55,13 +55,13 @@ API
 
 .. c:macro:: UV_REQ_TYPE_MAP(iter_macro)
 
-    扩展为每个请求类型的一系列“iter_macro”调用的宏。 `iter_macro` 使用两个参数调用：没有 `UV_` 前缀的 `uv_req_type` 元素的名称，以及没有 `uv_` 前缀和 `_t` 后缀的相应结构类型的名称.
+    扩展为每个请求类型的一系列 "iter_macro" 调用的宏。 `iter_macro` 使用两个参数调用：没有 `UV_` 前缀的 `uv_req_type` 元素的名称，以及没有 `uv_` 前缀和 `_t` 后缀的相应结构类型的名称.
 
 .. c:function:: int uv_cancel(uv_req_t* req)
 
     取消挂起的请求。如果请求正在执行或已完成执行，则失败.
 
-    成功返回 0，失败返回错误代码 < 0.
+    成功返回 0, 失败返回错误代码 < 0.
 
     当前仅取消 :c:type:`uv_fs_t`、:c:type:`uv_getaddrinfo_t`、:c:type:`uv_getnameinfo_t`、:c:type:`uv_random_t` 和 :c:type:`uv_work_t` 请求支持的.
 

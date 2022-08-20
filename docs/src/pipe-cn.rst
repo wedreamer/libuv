@@ -4,7 +4,7 @@
 :c:type:`uv_pipe_t` --- Pipe handle
 ===================================
 
-管道句柄对 Unix 上的流文件（包括本地域套接字、管道和 FIFO） 和 Windows 上的命名管道提供了抽象。
+管道句柄对 Unix 上的流文件 (包括本地域套接字、管道和 FIFO) 和 Windows 上的命名管道提供了抽象。
 
 :c:type:`uv_pipe_t` is a 'subclass' of :c:type:`uv_stream_t`.
 
@@ -99,11 +99,11 @@ API
 
 .. c:function:: int uv_pipe(uv_file fds[2], int read_flags, int write_flags)
 
-    创建一对连接的管道句柄。数据可以写入`fds[1]`并从`fds[0]`读取。 生成的句柄可以传递给 `uv_pipe_open`，与 `uv_spawn` 一起使用，或用于任何其他目的。
+    创建一对连接的管道句柄。数据可以写入 `fds[1]` 并从 `fds[0]` 读取。 生成的句柄可以传递给 `uv_pipe_open`，与 `uv_spawn` 一起使用，或用于任何其他目的。
 
     `flags` 的有效值为:
 
-      - UV_NONBLOCK_PIPE: 为 `OVERLAPPED` 或 `FIONBIO`/`O_NONBLOCK` I/O 使用打开指定的套接字句柄。对于 libuv 将使用的句柄，建议这样做，否则通常不建议使用.
+      - UV_NONBLOCK_PIPE: 为 `OVERLAPPED` 或 `FIONBIO`/ `O_NONBLOCK` I/O 使用打开指定的套接字句柄。对于 libuv 将使用的句柄，建议这样做，否则通常不建议使用.
 
     等效于设置了 `O_CLOEXEC` 标志的 :man:`pipe(2)`.
 

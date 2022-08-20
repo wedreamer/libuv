@@ -41,6 +41,7 @@ Data types
             UV_READABLE = 1,
             UV_WRITABLE = 2,
             UV_DISCONNECT = 4,
+            // 优先
             UV_PRIORITIZED = 8
         };
 
@@ -70,7 +71,7 @@ API
 
 .. c:function:: int uv_poll_start(uv_poll_t* handle, int events, uv_poll_cb cb)
 
-    开始轮询文件描述符。 `events` 是一个位掩码，由 `UV_READABLE`、`UV_WRITABLE`、`UV_PRIORITIZED` 和 `UV_DISCONNECT` 组成。 一旦检测到事件，将调用回调，并将 `status` 设置为 0，并将检测到的事件设置在 `events` 字段中.
+    开始轮询文件描述符。 `events` 是一个位掩码，由 `UV_READABLE`、 `UV_WRITABLE`、 `UV_PRIORITIZED` 和 `UV_DISCONNECT` 组成。 一旦检测到事件，将调用回调，并将 `status` 设置为 0, 并将检测到的事件设置在 `events` 字段中.
 
     `UV_PRIORITIZED` 事件用于监视 sysfs 中断或 TCP 带外消息.
 
@@ -85,7 +86,7 @@ API
         虽然可以设置 `UV_DISCONNECT`，但在 AIX 上不受支持，因此不会在回调中的 `events` 字段上设置.
 
     .. note::
-        如果设置了 “UV_READABLE” 或 “UV_WRITABLE” 事件之一，只要给定的 fd/socket 相应地保持可读或可写，就会再次调用回调。 特别是在以下每种情况下:
+        如果设置了 "UV_READABLE" 或 "UV_WRITABLE" 事件之一，只要给定的 fd/socket 相应地保持可读或可写，就会再次调用回调。 特别是在以下每种情况下:
 
         * 回调已被调用，因为套接字变得可读/可写并且回调根本没有对该套接字进行读/写.
         * 回调提交了对套接字的读取，但尚未读取所有可用数据（当设置了 `UV_READABLE` 时）.

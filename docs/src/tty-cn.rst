@@ -72,12 +72,12 @@ API
     * 1 = stdout
     * 2 = stderr
 
-    在 Unix 上，此函数将使用 ttyname_r(3) 确定终端 fd 的路径，打开它，如果传递的文件描述符指向 TTY，则使用它。这让 libuv 将 tty 置于非阻塞模式，而不会影响共享 tty 的其他进程.
+    在 Unix 上，此函数将使用 ttyname_r(3) 确定终端 fd 的路径，打开它，如果传递的文件描述符指向 TTY, 则使用它。这让 libuv 将 tty 置于非阻塞模式，而不会影响共享 tty 的其他进程.
 
     此函数在不支持 ioctl TIOCGPTN 或 TIOCPTYGNAME 的系统上不是线程安全的，例如 OpenBSD 和 Solaris.
 
     .. note::
-        如果重新打开 TTY 失败，libuv 会退回到阻止写入.
+        如果重新打开 TTY 失败, libuv 会退回到阻止写入.
 
     .. versionchanged:: 1.23.1: the `readable` parameter is now unused and ignored.
                         The correct value will now be auto-detected from the kernel.

@@ -16,7 +16,7 @@ Data types
 
 .. c:type:: void (*uv_getaddrinfo_cb)(uv_getaddrinfo_t* req, int status, struct addrinfo* res)
 
-    完成后将使用 getaddrinfo 请求结果调用的回调。 如果它被取消，`status` 将具有 `UV_ECANCELED` 的值.
+    完成后将使用 getaddrinfo 请求结果调用的回调。 如果它被取消， `status` 将具有 `UV_ECANCELED` 的值.
 
 .. c:type:: uv_getnameinfo_t
 
@@ -24,7 +24,7 @@ Data types
 
 .. c:type:: void (*uv_getnameinfo_cb)(uv_getnameinfo_t* req, int status, const char* hostname, const char* service)
 
-    完成后将使用 getnameinfo 请求结果调用的回调。 如果它被取消，`status` 将具有 `UV_ECANCELED` 的值.
+    完成后将使用 getnameinfo 请求结果调用的回调。 如果它被取消， `status` 将具有 `UV_ECANCELED` 的值.
 
 
 Public members
@@ -66,7 +66,7 @@ API
 
     Asynchronous :man:`getaddrinfo(3)`.
 
-    节点或服务中的任何一个都可以为 NULL，但不能同时为 NULL.
+    节点或服务中的任何一个都可以为 NULL, 但不能同时为 NULL.
 
     `hints` 是指向带有附加地址类型约束的 struct addrinfo 的指针，即 NULL。 有关更多详细信息，请参阅 `man -s 3 getaddrinfo`.
 

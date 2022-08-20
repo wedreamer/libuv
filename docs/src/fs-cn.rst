@@ -4,7 +4,7 @@
 文件系统操作
 ======================
 
-libuv 提供了广泛的跨平台同步和异步文件系统操作。 本文档中定义的所有函数都接受一个回调，允许为 NULL。 如果回调为NULL，则请求同步完成，否则将异步执行.
+libuv 提供了广泛的跨平台同步和异步文件系统操作。 本文档中定义的所有函数都接受一个回调，允许为 NULL。 如果回调为 NULL, 则请求同步完成, 否则将异步执行.
 
 所有文件操作都在线程池上运行。 有关线程池大小的信息，请参阅 :ref:`threadpool`.
 
@@ -120,8 +120,8 @@ Data types
 
 .. c:enum:: uv_dirent_t
 
-    Cross platform (reduced) equivalent of ``struct dirent``.
-    Used in :c:func:`uv_fs_scandir_next`.
+    ``struct dirent``的跨平台（简化）等价物.
+    用于:c:func:`uv_fs_scandir_next`.
 
     ::
 
@@ -176,7 +176,7 @@ Public members
 
 .. c:member:: uv_stat_t uv_fs_t.statbuf
 
-    存储:c:func:`uv_fs_stat` 和其他统计请求的结果.
+    存储 :c:func:`uv_fs_stat` 和其他统计请求的结果.
 
 .. c:member:: void* uv_fs_t.ptr
 
@@ -201,14 +201,14 @@ API
     Equivalent to :man:`open(2)`.
 
     .. note::
-        在 Windows 上，libuv 使用`CreateFileW`，因此文件总是以二进制模式打开。 因此，不支持 O_BINARY 和 O_TEXT 标志.
+        在 Windows 上, libuv 使用 `CreateFileW`，因此文件总是以二进制模式打开。 因此，不支持 O_BINARY 和 O_TEXT 标志.
 
 .. c:function:: int uv_fs_read(uv_loop_t* loop, uv_fs_t* req, uv_file file, const uv_buf_t bufs[], unsigned int nbufs, int64_t offset, uv_fs_cb cb)
 
     Equivalent to :man:`preadv(2)`.
 
     .. warning::
-        在 Windows 上，在非 MSVC 环境下（例如，当使用 GCC 或 Clang 构建 libuv 时），如果内存映射读取操作失败，使用“UV_FS_O_FILEMAP”打开的文件可能会导致致命崩溃.
+        在 Windows 上，在非 MSVC 环境下 (例如，当使用 GCC 或 Clang 构建 libuv 时), 如果内存映射读取操作失败, 使用 "UV_FS_O_FILEMAP" 打开的文件可能会导致致命崩溃.
 
 .. c:function:: int uv_fs_unlink(uv_loop_t* loop, uv_fs_t* req, const char* path, uv_fs_cb cb)
 
@@ -219,7 +219,7 @@ API
     Equivalent to :man:`pwritev(2)`.
 
     .. warning::
-        在 Windows 上，在非 MSVC 环境下（例如，当使用 GCC 或 Clang 构建 libuv 时），如果内存映射写入操作失败，使用“UV_FS_O_FILEMAP”打开的文件可能会导致致命崩溃.
+        在 Windows 上，在非 MSVC 环境下 (例如，当使用 GCC 或 Clang 构建 libuv 时), 如果内存映射写入操作失败, 使用 "UV_FS_O_FILEMAP" 打开的文件可能会导致致命崩溃.
 
 .. c:function:: int uv_fs_mkdir(uv_loop_t* loop, uv_fs_t* req, const char* path, int mode, uv_fs_cb cb)
 
@@ -261,7 +261,7 @@ API
 
     遍历由成功的 uv_fs_opendir() 调用返回的目录流 dir。 在调用 `uv_fs_readdir()` 之前，调用者必须设置 `dir->dirents` 和 `dir->nentries`，代表 :c:type:`uv_dirent_t` 元素的数组，用于保存读取的目录条目及其大小.
 
-    成功时，结果是一个整数 >= 0，表示从流中读取的条目数.
+    成功时，结果是一个整数 >= 0, 表示从流中读取的条目数.
 
     .. versionadded:: 1.28.0
 
@@ -277,13 +277,13 @@ API
 .. c:function:: int uv_fs_scandir(uv_loop_t* loop, uv_fs_t* req, const char* path, int flags, uv_fs_cb cb)
 .. c:function:: int uv_fs_scandir_next(uv_fs_t* req, uv_dirent_t* ent)
 
-    等效于:man:`scandir(3)`，API 略有不同。 一旦调用了请求的回调，用户就可以使用 :c:func:`uv_fs_scandir_next` 来获取 `ent` 填充下一个目录条目数据。 当没有更多条目时，将返回“UV_EOF”.
+    等效于:man:`scandir(3)`, API 略有不同。 一旦调用了请求的回调，用户就可以使用 :c:func:`uv_fs_scandir_next` 来获取 `ent` 填充下一个目录条目数据。 当没有更多条目时, 将返回"UV_EOF".
 
     .. note::
         与 `scandir(3)` 不同，此函数不返回 "." 和“..”条目.
 
     .. note::
-        在 Linux 上，仅某些文件系统（btrfs、ext2、ext3 和 ext4 在撰写本文时）支持获取条目的类型，请查看:man:`getdents(2)` 手册页.
+        在 Linux 上, 仅某些文件系统 (btrfs、ext2、ext3 和 ext4 在撰写本文时) 支持获取条目的类型，请查看:man:`getdents(2)` 手册页.
 
 .. c:function:: int uv_fs_stat(uv_loop_t* loop, uv_fs_t* req, const char* path, uv_fs_cb cb)
 .. c:function:: int uv_fs_fstat(uv_loop_t* loop, uv_fs_t* req, uv_file file, uv_fs_cb cb)
@@ -309,7 +309,7 @@ API
     Equivalent to :man:`fsync(2)`.
 
     .. note::
-        对于 AIX，`uv_fs_fsync` 在引用非常规文件的文件描述符上返回 `UV_EBADF`.
+        对于 AIX, `uv_fs_fsync` 在引用非常规文件的文件描述符上返回 `UV_EBADF`.
 
 .. c:function:: int uv_fs_fdatasync(uv_loop_t* loop, uv_fs_t* req, uv_file file, uv_fs_cb cb)
 
@@ -335,9 +335,7 @@ API
     .. versionchanged:: 1.20.0 `UV_FS_COPYFILE_FICLONE` and
         `UV_FS_COPYFILE_FICLONE_FORCE` are supported.
 
-    .. versionchanged:: 1.33.0 If an error occurs while using
-        `UV_FS_COPYFILE_FICLONE_FORCE`, that error is returned. Previously,
-        all errors were mapped to `UV_ENOTSUP`.
+    .. versionchanged:: 1.33.0 If an error occurs while using `UV_FS_COPYFILE_FICLONE_FORCE`, that error is returned. Previously, all errors were mapped to `UV_ENOTSUP`.
 
 .. c:function:: int uv_fs_sendfile(uv_loop_t* loop, uv_fs_t* req, uv_file out_fd, uv_file in_fd, int64_t in_offset, size_t length, uv_fs_cb cb)
 
@@ -398,10 +396,10 @@ API
     .. warning::
         此函数具有某些特定于平台的警告，这些警告是在 Node 中使用时发现的.
 
-        * macOS 和其他 BSD：如果在解析给定路径时发现超过 32 个符号链接，此函数将失败并显示 UV_ELOOP。 此限制是硬编码的，无法回避.
-        * Windows：虽然此功能在常见情况下有效，但在一些特殊情况下它不起作用:
+        * macOS 和其他 BSD: 如果在解析给定路径时发现超过 32 个符号链接，此函数将失败并显示 UV_ELOOP。 此限制是硬编码的，无法回避.
+        * Windows: 虽然此功能在常见情况下有效, 但在一些特殊情况下它不起作用:
 
-          - 无法解析由避开卷管理器的工具（例如 ImDisk）创建的 ramdisk 卷中的路径.
+          - 无法解析由避开卷管理器的工具 (例如 ImDisk) 创建的 ramdisk 卷中的路径.
           - 使用驱动器号时大小写不一致.
           - 解决的路径绕过 subst'd 驱动器.
 
@@ -440,8 +438,7 @@ API
 
 .. c:function:: int uv_fs_get_system_error(const uv_fs_t* req)
 
-    Returns the platform specific error code - `GetLastError()` value on Windows
-    and `-(req->result)` on other platforms.
+    Returns the platform specific error code - `GetLastError()` value on Windows and `-(req->result)` on other platforms.
 
     .. versionadded:: 1.38.0
 
@@ -520,7 +517,7 @@ File open constants
     如果设置了 `O_CREAT` 标志并且文件已经存在，则打开失败.
 
     .. note::
-        一般来说，如果在没有 `O_CREAT` 的情况下使用 `O_EXCL`，它的行为是未定义的。 有一个例外：在 Linux 2.6 及更高版本上，如果路径名指的是块设备，则可以在不使用 `O_CREAT` 的情况下使用 `O_EXCL`。 如果系统正在使用块设备（例如，已挂载），则打开将失败并显示错误“EBUSY”.
+        一般来说，如果在没有 `O_CREAT` 的情况下使用 `O_EXCL`，它的行为是未定义的。 有一个例外：在 Linux 2.6 及更高版本上，如果路径名指的是块设备，则可以在不使用 `O_CREAT` 的情况下使用 `O_EXCL`。 如果系统正在使用块设备(例如, 已挂载), 则打开将失败并显示错误 "EBUSY".
 
 .. c:macro:: UV_FS_O_EXLOCK
 

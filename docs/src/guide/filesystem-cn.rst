@@ -149,7 +149,7 @@ libuv 中的基本 I/O 句柄是流（ ``uv_stream_t`` ）。 TCP 套接字、UD
     int uv_write(uv_write_t* req, uv_stream_t* handle,
                  const uv_buf_t bufs[], unsigned int nbufs, uv_write_cb cb);
 
-基于流的函数比文件系统函数更易于使用，并且当 `uv_read_start()` 是时, libuv 将自动继续从流中读取调用一次，直到 `uv_read_stop()` 被调用。
+基于流的函数比文件系统函数更易于使用，并且当 `uv_read_start()` 调用时, libuv 将自动继续从流中读取调用一次，直到 `uv_read_stop()` 被调用。
 
 数据的离散单元是缓冲区—— ``uv_buf_t``。 这简直指向字节的指针（ ``uv_buf_t.base`` ）和长度的集合（ ``uv_buf_t.len`` ）。 `uv_buf_t` 是轻量级的, 并按值传递。需要管理的是必须分配的实际字节并由应用程序释放。
 
@@ -201,7 +201,7 @@ libuv 中的基本 I/O 句柄是流（ ``uv_stream_t`` ）。 TCP 套接字、UD
 
 .. WARNING::
 
-    如果您的程序打算与其他程序一起使用，它可能会故意或在不知不觉中正在写入管道。 这使得它容易被 `aborting on接收 SIGPIPE`_。 插入是个好主意::
+    如果您的程序打算与其他程序一起使用，它可能会故意或在不知不觉中正在写入管道。 这使得它容易被 `aborting on 接收 SIGPIPE`_。 插入是个好主意::
 
         signal(SIGPIPE, SIG_IGN)
 

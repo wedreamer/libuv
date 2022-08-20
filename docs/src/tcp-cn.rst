@@ -55,7 +55,7 @@ API
 
     启用/禁用 TCP 保持活动。 `delay` 是以秒为单位的初始延迟，当 `enable` 为零时忽略.
 
-    达到“延迟”后，仍然会发生 10 次连续探测，每次探测与前一次间隔 1 秒。如果在此过程结束时连接仍然丢失，则句柄将被销毁，并传递给相应回调的“UV_ETIMEDOUT”错误.
+    达到“延迟”后，仍然会发生 10 次连续探测，每次探测与前一次间隔 1 秒。如果在此过程结束时连接仍然丢失, 则句柄将被销毁, 并传递给相应回调的 "UV_ETIMEDOUT" 错误.
 
 .. c:function:: int uv_tcp_simultaneous_accepts(uv_tcp_t* handle, int enable)
 
@@ -107,7 +107,7 @@ API
 
     `flags0` 和 `flags1` 的有效值为:
 
-      - UV_NONBLOCK_PIPE: 为 `OVERLAPPED` 或 `FIONBIO`/`O_NONBLOCK` I/O 使用打开指定的套接字句柄.
+      - UV_NONBLOCK_PIPE: 为 `OVERLAPPED` 或 `FIONBIO`/ `O_NONBLOCK` I/O 使用打开指定的套接字句柄.
         对于将由 libuv 使用的句柄，这是推荐的，否则通常不推荐。
 
     等效于 :man:`socketpair(2)`，域为 AF_UNIX。

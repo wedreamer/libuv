@@ -26,7 +26,7 @@ API
 
 .. c:function:: int uv_dlopen(const char* filename, uv_lib_t* lib)
 
-    打开共享库。 文件名是 utf-8。 成功返回 0，错误返回 -1。 调用 :c:func:`uv_dlerror` 获取错误信息.
+    打开共享库。 文件名是 utf-8。 成功返回 0, 错误返回 -1。 调用 :c:func:`uv_dlerror` 获取错误信息.
 
 .. c:function:: void uv_dlclose(uv_lib_t* lib)
 
@@ -34,7 +34,7 @@ API
 
 .. c:function:: int uv_dlsym(uv_lib_t* lib, const char* name, void** ptr)
 
-    从动态库中检索数据指针。 符号映射到 NULL 是合法的。 成功返回 0，如果未找到符号则返回 -1.
+    从动态库中检索数据指针。 符号映射到 NULL 是合法的。 成功返回 0, 如果未找到符号则返回 -1.
 
 .. c:function:: const char* uv_dlerror(const uv_lib_t* lib)
 

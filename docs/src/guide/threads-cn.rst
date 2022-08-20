@@ -1,17 +1,17 @@
 线程
 =======
 
-等一下？ 为什么我们在线程上？ 事件循环不应该是 **进行*网络规模编程*的方式**吗？ 嗯……不。 线程仍然是处理器完成工作的媒介。 因此，线程有时非常有用，即使您可能不得不涉足各种同步原语。
+等一下？ 为什么我们在线程上？ 事件循环不应该是 **进行 *网络规模编程* 的方式**吗？ 嗯……不。 线程仍然是处理器完成工作的媒介。 因此，线程有时非常有用，即使您可能不得不涉足各种同步原语。
 
 线程在内部用于伪造所有系统调用的异步特性。 libuv 还使用线程允许应用程序异步执行实际上是阻塞的任务，方法是生成一个线程并在完成时收集结果。
 
-今天有两个主要的线程库：Windows 线程实现和 POSIX 的:man:`pthreads(7)`。 libuv 的线程 API 类似于 pthreads API，并且通常具有相似的语义。
+今天有两个主要的线程库: Windows 线程实现和 POSIX 的 :man:`pthreads(7)`。 libuv 的线程 API 类似于 pthreads API, 并且通常具有相似的语义。
 
 libuv 的线程设施的一个显着方面是它是 libuv 中一个独立的部分。 虽然其他特性密切依赖于事件循环和回调原则，但线程是完全不可知的，它们会根据需要阻塞，直接通过返回值发出错误信号，并且如第一个示例 <thread-create-example> 所示 ，甚至不需要运行事件循环。
 
 libuv 的线程 API 也非常有限，因为线程的语义和语法在所有平台上都是不同的，具有不同的完整性级别。
 
-本章做出以下假设：**只有一个事件循环，在一个线程（主线程）中运行**。 没有其他线程与事件循环交互（使用 `uv_async_send` 除外）。
+本章做出以下假设： **只有一个事件循环，在一个线程（主线程）中运行**。 没有其他线程与事件循环交互（使用 `uv_async_send` 除外）。
 
 线程核心操作
 ----------------------
@@ -31,7 +31,7 @@ libuv 的线程 API 也非常有限，因为线程的语义和语法在所有平
 
     ``uv_thread_t`` 只是 Unix 上 ``pthread_t`` 的别名，但这是一个实现细节，避免依赖它始终为真.
 
-第二个参数是作为线程入口点的函数，最后一个参数是 ``void *`` 参数，可用于将自定义参数传递给线程。 函数“hare”现在将在一个单独的线程中运行，由操作系统抢先调度:
+第二个参数是作为线程入口点的函数，最后一个参数是 ``void *`` 参数，可用于将自定义参数传递给线程。 函数 "hare" 现在将在一个单独的线程中运行，由操作系统抢先调度:
 
 .. rubric:: thread-create/main.c
 .. literalinclude:: ../../code/thread-create/main.c
@@ -62,7 +62,7 @@ Mutexes
     int uv_mutex_trylock(uv_mutex_t* handle);
     void uv_mutex_unlock(uv_mutex_t* handle);
 
-`uv_mutex_init()`、 `uv_mutex_init_recursive()` 和 `uv_mutex_trylock()` 函数将在成功时返回 0，否则返回错误代码.
+`uv_mutex_init()`、 `uv_mutex_init_recursive()` 和 `uv_mutex_trylock()` 函数将在成功时返回 0, 否则返回错误代码.
 
 如果 `libuv` 已在启用调试的情况下编译， `uv_mutex_destroy()`、 `uv_mutex_lock()` 和 `uv_mutex_unlock()` 将在出错时 `abort()`。 类似地，如果错误是 *除了* ``EAGAIN`` 或 ``EBUSY`` 之外的任何错误， ``uv_mutex_trylock()`` 将中止.
 
@@ -100,13 +100,13 @@ Locks
 Others
 ~~~~~~
 
-libuv 还支持信号量_、 `条件变量`_ 和障碍_，其 API 与它们的 pthread 对应物非常相似.
+libuv 还支持信号量_、 `条件变量`_ 和障碍_, 其 API 与它们的 pthread 对应物非常相似.
 
 .. _semaphores: https://en.wikipedia.org/wiki/Semaphore_(programming)
 .. _condition variables: https://en.wikipedia.org/wiki/Monitor_(synchronization)#Condition_variables_2
 .. _barriers: https://en.wikipedia.org/wiki/Barrier_(computer_science)
 
-此外，libuv 提供了一个方便的函数 `uv_once()`。 多个线程可以尝试使用给定的守卫和函数指针调用 `uv_once()`， **只有第一个获胜，该函数将被调用一次且仅一次**::
+此外, libuv 提供了一个方便的函数 `uv_once()`。 多个线程可以尝试使用给定的守卫和函数指针调用 `uv_once()`,  **只有第一个获胜，该函数将被调用一次且仅一次**::
 
     /* Initialize guard */
     static uv_once_t once_only = UV_ONCE_INIT;
@@ -169,7 +169,7 @@ The trigger is ``uv_queue_work``:
 
 为了将包装器写入阻塞库，一个常见的 :ref:`pattern <baton>` 是使用接力棒来交换数据.
 
-从 libuv 版本 `0.9.4` 开始，可以使用附加函数 `uv_cancel()`。 这允许您取消 libuv 工作队列上的任务。 只有 * 尚未开始 * 的任务才能被取消。 如果一个任务*已经开始执行，或者它已经完成执行*，`uv_cancel()` **将失败**.
+从 libuv 版本 `0.9.4` 开始，可以使用附加函数 `uv_cancel()`。 这允许您取消 libuv 工作队列上的任务。 只有 * 尚未开始 * 的任务才能被取消。 如果一个任务*已经开始执行，或者它已经完成执行*, `uv_cancel()` **将失败**.
 
 如果用户请求终止， `uv_cancel()` 对于清理挂起的任务很有用。 例如，音乐播放器可能会排队多个目录以扫描音频文件。 如果用户终止程序，它应该快速退出，而不是等到所有挂起的请求都运行完毕.
 

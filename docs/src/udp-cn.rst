@@ -77,17 +77,17 @@ Data types
 
     * `handle`: UDP句柄
     * `nread`:  已接收的字节数.
-      如果没有更多数据要读取，则为 0。请注意，0 也可能意味着接收到一个空数据报（在这种情况下，`addr` 不是 NULL）. 
+      如果没有更多数据要读取，则为 0。请注意, 0 也可能意味着接收到一个空数据报(在这种情况下，`addr` 不是 NULL). 
       < 0 如果检测到传输错误；如果使用:man:`recvmmsg(2)` 将不再接收块并且可以安全地释放缓冲区.
     * `buf`: :c:type:`uv_buf_t` 与接收到的数据.
     * `addr`: ``struct sockaddr*`` 包含发送者的地址.
       可以为 NULL。仅在回调期间有效.
     * `flags`: 一个或多个 or'ed UV_UDP_* 常量.
 
-    被调用者负责释放缓冲区，libuv 不重用它.
-    错误时缓冲区可能是空缓冲区（其中 `buf->base` == NULL 和 `buf->len` == 0）.
+    被调用者负责释放缓冲区, libuv 不重用它.
+    错误时缓冲区可能是空缓冲区(其中 `buf->base` == NULL 和 `buf->len` == 0).
 
-    当使用 :man:`recvmmsg(2)` 时，块将设置 `UV_UDP_MMSG_CHUNK` 标志，这些标志不能被释放。如果没有发生错误，将有一个最终回调，将 `nread` 设置为 0，`addr` 设置为 NULL，并且缓冲区指向最初分配的数据，清除 `UV_UDP_MMSG_CHUNK` 标志并设置 `UV_UDP_MMSG_FREE` 标志。如果发生 UDP 套接字错误，`nread` 将 < 0。在任何一种情况下，被调用者现在都可以安全地释放提供的缓冲区.
+    当使用 :man:`recvmmsg(2)` 时，块将设置 `UV_UDP_MMSG_CHUNK` 标志，这些标志不能被释放。如果没有发生错误，将有一个最终回调，将 `nread` 设置为 0, `addr` 设置为 NULL, 并且缓冲区指向最初分配的数据，清除 `UV_UDP_MMSG_CHUNK` 标志并设置 `UV_UDP_MMSG_FREE` 标志。如果发生 UDP 套接字错误，`nread` 将 < 0。在任何一种情况下, 被调用者现在都可以安全地释放提供的缓冲区.
 
     .. versionchanged:: 1.40.0 added the `UV_UDP_MMSG_FREE` flag.
 
@@ -139,8 +139,7 @@ API
 
     其余位可用于设置这些标志之一:
 
-    * `UV_UDP_RECVMMSG`: 如果设置，并且平台支持它，recvmmsg(2) 将
-使用.
+    * `UV_UDP_RECVMMSG`: 如果设置, 并且平台支持它, recvmmsg(2) 将使用.
 
     .. versionadded:: 1.7.0
     .. versionchanged:: 1.37.0 added the `UV_UDP_RECVMMSG` flag.
@@ -166,7 +165,7 @@ API
 
     :param addr: `struct sockaddr_in` 或 `struct sockaddr_in6` 绑定地址和端口.
 
-    :param flags: 指示如何绑定套接字，支持“UV_UDP_IPV6ONLY”、“UV_UDP_REUSEADDR”和“UV_UDP_RECVERR”.
+    :param flags: 指示如何绑定套接字, 支持 "UV_UDP_IPV6ONLY"、"UV_UDP_REUSEADDR" 和 "UV_UDP_RECVERR".
 
     :returns: 0 on success, or an error code < 0 on failure.
 
@@ -174,8 +173,7 @@ API
 
     将 UDP 句柄与远程地址和端口相关联，因此此句柄发送的每条消息都会自动发送到该目的地.
     使用 `NULL` `addr` 调用此函数会断开句柄.
-    尝试在已连接的句柄上调用 `uv_udp_connect()` 将导致 `UV_EISCONN` 错误。试图断开一个不是
-connected 将返回一个 `UV_ENOTCONN` 错误.
+    尝试在已连接的句柄上调用 `uv_udp_connect()` 将导致 `UV_EISCONN` 错误。试图断开一个不是 connected 将返回一个 `UV_ENOTCONN` 错误.
 
     :param handle: UDP 句柄。应该用 :c:func:`uv_udp_init` 初始化.
 
@@ -298,14 +296,14 @@ connected 将返回一个 `UV_ENOTCONN` 错误.
 
 .. c:function:: int uv_udp_send(uv_udp_send_t* req, uv_udp_t* handle, const uv_buf_t bufs[], unsigned int nbufs, const struct sockaddr* addr, uv_udp_send_cb send_cb)
 
-    通过 UDP 套接字发送数据。如果套接字之前没有绑定:c:func:`uv_udp_bind`，它将绑定到 0.0.0.0（“所有接口”IPv4 地址）和一个随机端口号.
+    通过 UDP 套接字发送数据。如果套接字之前没有绑定:c:func:`uv_udp_bind`，它将绑定到 0.0.0.0("所有接口" IPv4 地址）和一个随机端口号.
 
-    在 Windows 上，如果“addr”被初始化为指向一个未指定的地址（“0.0.0.0”或“::”），它将被更改为指向“localhost”.
+    在 Windows 上, 如果 "addr" 被初始化为指向一个未指定的地址("0.0.0.0" 或 "::"), 它将被更改为指向 "localhost".
     这样做是为了匹配 Linux 系统的行为.
 
     对于连接的 UDP 句柄，`addr` 必须设置为 `NULL`，否则会返回 `UV_EISCONN` 错误.
 
-    对于无连接的UDP句柄，`addr`不能为`NULL`，否则会返回`UV_EDESTADDRREQ`错误.
+    对于无连接的UDP句柄, `addr`不能为 `NULL`, 否则会返回 `UV_EDESTADDRREQ`错误.
 
     :param req: UDP 请求句柄。不需要初始化.
 
@@ -332,16 +330,16 @@ connected 将返回一个 `UV_ENOTCONN` 错误.
 
     对于连接的 UDP 句柄，`addr` 必须设置为 `NULL`，否则会返回 `UV_EISCONN` 错误.
 
-    对于无连接的UDP句柄，`addr`不能为`NULL`，否则会返回`UV_EDESTADDRREQ`错误.
+    对于无连接的UDP句柄, `addr`不能为`NULL`，否则会返回`UV_EDESTADDRREQ`错误.
 
     :returns: >= 0: 发送的字节数（它与给定的缓冲区大小匹配）.
-        < 0: 负错误码（无法立即发送消息时返回``UV_EAGAIN``）.
+        < 0: 负错误码(无法立即发送消息时返回 ``UV_EAGAIN``).
 
     .. versionchanged:: 1.27.0 added support for connected sockets
 
 .. c:function:: int uv_udp_recv_start(uv_udp_t* handle, uv_alloc_cb alloc_cb, uv_udp_recv_cb recv_cb)
 
-    准备接收数据。如果套接字之前没有绑定:c:func:`uv_udp_bind`，它绑定到 0.0.0.0（“所有接口”IPv4 地址）和一个随机端口号.
+    准备接收数据。如果套接字之前没有绑定:c:func:`uv_udp_bind`，它绑定到 0.0.0.0("所有接口" IPv4 地址）和一个随机端口号.
 
     :param handle: UDP 句柄。应该用 :c:func:`uv_udp_init` 初始化.
 
@@ -352,7 +350,7 @@ connected 将返回一个 `UV_ENOTCONN` 错误.
     :returns: 0 on success, or an error code < 0 on failure.
 
     .. note::
-        当使用：man:`recvmmsg(2)` 时，一次接收的消息数量受最大大小 dgram 的数量限制，这些 dgram 将适合在 `alloc_cb` 中分配的缓冲区和 `alloc_cb` 中的 `suggested_size` udp_recv 始终设置为 1 max size dgram 的大小.
+        当使用: man:`recvmmsg(2)` 时，一次接收的消息数量受最大大小 dgram 的数量限制，这些 dgram 将适合在 `alloc_cb` 中分配的缓冲区和 `alloc_cb` 中的 `suggested_size` udp_recv 始终设置为 1 max size dgram 的大小.
 
     .. versionchanged:: 1.35.0 added support for :man:`recvmmsg(2)` on supported platforms).
                         The use of this feature requires a buffer larger than
@@ -366,7 +364,7 @@ connected 将返回一个 `UV_ENOTCONN` 错误.
 
 .. c:function:: int uv_udp_using_recvmmsg(uv_udp_t* handle)
 
-    如果 UDP 句柄是使用 `UV_UDP_RECVMMSG` 标志创建的并且平台支持:man:`recvmmsg(2)`，则返回 1，否则返回 0.
+    如果 UDP 句柄是使用 `UV_UDP_RECVMMSG` 标志创建的并且平台支持:man:`recvmmsg(2)`，则返回 1, 否则返回 0.
 
     .. versionadded:: 1.39.0
 

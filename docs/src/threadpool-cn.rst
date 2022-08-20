@@ -6,11 +6,11 @@ Thread pool work scheduling
 
 libuv 提供了一个线程池，可用于运行用户代码并在循环线程中获得通知。此线程池在内部用于运行所有文件系统操作，以及 getaddrinfo 和 getnameinfo 请求.
 
-它的默认大小是 4，但可以在启动时通过将 ``UV_THREADPOOL_SIZE`` 环境变量设置为任何值来更改它（绝对最大值为 1024）.
+它的默认大小是 4, 但可以在启动时通过将 ``UV_THREADPOOL_SIZE`` 环境变量设置为任何值来更改它(绝对最大值为 1024).
 
 .. versionchanged:: 1.30.0 the maximum UV_THREADPOOL_SIZE allowed was increased from 128 to 1024.
 
-线程池是全局的，并且在所有事件循环中共享。当特定函数使用线程池时（即使用 :c:func:`uv_queue_work` 时），libuv 预分配并初始化 `UV_THREADPOOL_SIZE` 允许的最大线程数。这会导致相对较小的内存开销（128 个线程约为 1MB），但会提高运行时线程的性能.
+线程池是全局的，并且在所有事件循环中共享。当特定函数使用线程池时(即使用 :c:func:`uv_queue_work` 时), libuv 预分配并初始化 `UV_THREADPOOL_SIZE` 允许的最大线程数。这会导致相对较小的内存开销(128 个线程约为 1MB), 但会提高运行时线程的性能.
 
 .. note::
     请注意，即使使用了在所有事件循环之间共享的全局线程池，这些函数也不是线程安全的.

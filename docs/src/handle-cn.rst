@@ -55,7 +55,7 @@ Data types
 
     每个缓冲区只使用一次，用户负责在 :c:type:`uv_udp_recv_cb` 或 :c:type:`uv_read_cb` 回调中释放它.
 
-    提供了建议的大小（在大多数情况下目前为 65536）,但这只是一个指示，与要读取的未决数据有任何关系。 用户可以自由分配他们决定的内存量.
+    提供了建议的大小 (在大多数情况下目前为 65536), 但这只是一个指示，与要读取的未决数据有任何关系。 用户可以自由分配他们决定的内存量.
 
     例如，具有自定义分配方案（例如使用空闲列表、分配池或基于平板的分配器）的应用程序可能会决定使用与它们已有的内存块匹配的不同大小.
 
@@ -94,11 +94,11 @@ API
 
 .. c:macro:: UV_HANDLE_TYPE_MAP(iter_macro)
 
-    扩展为每个句柄类型的一系列“iter_macro”调用的宏。 `iter_macro` 使用两个参数调用：没有 `UV_` 前缀的 `uv_handle_type` 元素的名称，以及没有 `uv_` 前缀和 `_t` 后缀的相应结构类型的名称.
+    扩展为每个句柄类型的一系列 "iter_macro" 调用的宏。 `iter_macro` 使用两个参数调用：没有 `UV_` 前缀的 `uv_handle_type` 元素的名称，以及没有 `uv_` 前缀和 `_t` 后缀的相应结构类型的名称.
 
 .. c:function:: int uv_is_active(const uv_handle_t* handle)
 
-    如果句柄处于活动状态，则返回非零，如果不活动，则返回零。 “活动”的含义取决于句柄的类型:
+    如果句柄处于活动状态，则返回非零，如果不活动，则返回零。 "活动" 的含义取决于句柄的类型:
 
     - uv_async_t 句柄始终处于活动状态并且不能被停用，除非使用 uv_close() 关闭它.
 
@@ -110,7 +110,7 @@ API
 
 .. c:function:: int uv_is_closing(const uv_handle_t* handle)
 
-    如果句柄正在关闭或关闭，则返回非零，否则返回零.
+    如果句柄正在关闭或关闭, 则返回非零, 否则返回零.
 
     .. note::
         该函数只能在句柄初始化和关闭回调到达之间使用.
@@ -122,7 +122,7 @@ API
     包装文件描述符的句柄会立即关闭，但 `close_cb` 仍将推迟到事件循环的下一次迭代.
     它使您有机会释放与句柄相关的任何资源.
 
-    正在进行的请求，如 uv_connect_t 或 uv_write_t，将被取消，并以 status=UV_ECANCELED 异步调用它们的回调。
+    正在进行的请求，如 uv_connect_t 或 uv_write_t, 将被取消, 并以 status=UV_ECANCELED 异步调用它们的回调。
 
 .. c:function:: void uv_ref(uv_handle_t* handle)
 
@@ -156,7 +156,7 @@ Miscellaneous API functions
 
     获取或设置操作系统用于套接字的发送缓冲区的大小.
 
-    如果 `*value` == 0，那么它将设置 `*value` 为当前发送缓冲区大小。
+    如果 `*value` == 0, 那么它将设置 `*value` 为当前发送缓冲区大小。
     如果 `*value` > 0 那么它将使用 `*value` 设置新的发送缓冲区大小.
 
     成功时，返回零。 出错时，返回否定结果.
@@ -170,7 +170,7 @@ Miscellaneous API functions
 
     获取或设置操作系统用于套接字的接收缓冲区的大小.
 
-    如果 `*value` == 0，那么它将设置 `*value` 为当前接收缓冲区大小.
+    如果 `*value` == 0, 那么它将设置 `*value` 为当前接收缓冲区大小.
     如果 `*value` > 0 那么它将使用 `*value` 设置新的接收缓冲区大小.
 
     成功时，返回零。 出错时，返回否定结果。
@@ -184,7 +184,7 @@ Miscellaneous API functions
 
     等效于获取与平台相关的文件描述符.
 
-    支持以下句柄：TCP、管道、TTY、UDP 和 poll。 传递任何其他句柄类型将失败并显示 `UV_EINVAL`.
+    支持以下句柄: TCP、管道、TTY、UDP 和 poll。 传递任何其他句柄类型将失败并显示 `UV_EINVAL`.
 
     如果句柄还没有附加的文件描述符或句柄本身已关闭，此函数将返回 `UV_EBADF`.
 
@@ -229,7 +229,7 @@ Miscellaneous API functions
 Reference counting
 ------------------
 
-libuv 事件循环（如果在默认模式下运行）将一直运行，直到没有活动的 `and` 引用句柄。 用户可以通过取消引用活动的句柄来强制循环提前退出，例如在调用 :c:func:`uv_timer_start` 之后调用 :c:func:`uv_unref`.
+libuv 事件循环（如果在默认模式下运行）将一直运行，直到没有活动的 `and` 引用句柄。 用户可以通过取消引用活动的句柄来强制循环提前退出, 例如在调用 :c:func:`uv_timer_start` 之后调用 :c:func:`uv_unref`.
 
 句柄可以被引用或不被引用，引用计数方案不使用计数器，因此两个操作都是幂等的.
 

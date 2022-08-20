@@ -79,7 +79,7 @@ Threads
 
     类似于 :c:func:`uv_thread_create`，但另外指定了创建新线程的选项。
 
-    如果设置了 `UV_THREAD_HAS_STACK_SIZE`，`stack_size` 指定新线程的堆栈大小.
+    如果设置了 `UV_THREAD_HAS_STACK_SIZE`, `stack_size` 指定新线程的堆栈大小.
     `0` 表示应该使用默认值，即表现得好像没有设置标志.
     其他值将四舍五入到最近的页面边界.
 
@@ -111,7 +111,7 @@ Once-only initialization
 Mutex locks
 ^^^^^^^^^^^
 
-函数在成功或错误代码 < 0 时返回 0（当然，除非返回类型为 void）.
+函数在成功或错误代码 < 0 时返回 0(当然，除非返回类型为 void).
 
 .. c:function:: int uv_mutex_init(uv_mutex_t* handle)
 .. c:function:: int uv_mutex_init_recursive(uv_mutex_t* handle)
@@ -123,7 +123,7 @@ Mutex locks
 Read-write locks
 ^^^^^^^^^^^^^^^^
 
-函数在成功或错误代码 < 0 时返回 0（当然，除非返回类型为 void）.
+函数在成功或错误代码 < 0 时返回 0(当然，除非返回类型为 void).
 
 .. c:function:: int uv_rwlock_init(uv_rwlock_t* rwlock)
 .. c:function:: void uv_rwlock_destroy(uv_rwlock_t* rwlock)
@@ -137,7 +137,7 @@ Read-write locks
 Semaphores
 ^^^^^^^^^^
 
-函数在成功或错误代码 < 0 时返回 0（当然，除非返回类型为 void）.
+函数在成功或错误代码 < 0 时返回 0(当然, 除非返回类型为 void).
 
 .. c:function:: int uv_sem_init(uv_sem_t* sem, unsigned int value)
 .. c:function:: void uv_sem_destroy(uv_sem_t* sem)
@@ -148,7 +148,7 @@ Semaphores
 Conditions
 ^^^^^^^^^^
 
-函数在成功或错误代码 < 0 时返回 0（当然，除非返回类型为 void）.
+函数在成功或错误代码 < 0 时返回 0(当然, 除非返回类型为 void).
 
 .. note::
     1. 调用者应该准备好处理 :c:func:`uv_cond_wait` 和 :c:func:`uv_cond_timedwait` 上的虚假唤醒.
@@ -165,7 +165,7 @@ Conditions
 Barriers
 ^^^^^^^^
 
-函数在成功或错误代码 < 0 时返回 0（当然，除非返回类型为 void）.
+函数在成功或错误代码 < 0 时返回 0(当然, 除非返回类型为 void).
 
 .. note::
     :c:func:`uv_barrier_wait` 向任意选择的“序列化器”线程返回一个 > 0 的值以方便清理，即.

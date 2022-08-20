@@ -7,12 +7,12 @@
 FS 事件句柄允许用户监视给定路径的更改，例如，如果文件被重命名或其中存在一般更改。 此句柄为每个平台上的作业使用最佳支持.
 
 .. note::
-    对于 AIX，必须安装非默认 IBM bos.ahafs 包。 AIX 事件基础结构文件系统 (ahafs) 有一些限制:
+    对于 AIX, 必须安装非默认 IBM bos.ahafs 包。 AIX 事件基础结构文件系统 (ahafs) 有一些限制:
 
         - ahafs 跟踪每个进程的监控并且不是线程安全的。 必须为同一事件的每个监视器生成一个单独的进程.
         - 如果仅监视包含文件夹，则不会收到文件修改（写入文件）的事件.
 
-    有关更多详细信息，请参阅文档_.
+    有关更多详细信息, 请参阅文档_.
 
     Tz/OS 文件系统事件监视基础结构不会通知正在监视的目录中的文件创建/删除。 有关更多详细信息，请参阅 `IBM 知识中心`_.
 
@@ -104,7 +104,7 @@ API
 
 .. c:function:: int uv_fs_event_getpath(uv_fs_event_t* handle, char* buffer, size_t* size)
 
-    获取句柄监控的路径。 缓冲区必须由用户预先分配。 成功时返回 0，失败时返回错误代码 < 0。 成功时，`buffer` 将包含路径和`size` 长度。 如果缓冲区不够大，将返回 `UV_ENOBUFS` 并将 `size` 设置为所需的大小，包括空终止符.
+    获取句柄监控的路径。 缓冲区必须由用户预先分配。 成功时返回 0, 失败时返回错误代码 < 0。 成功时，`buffer` 将包含路径和`size` 长度。 如果缓冲区不够大，将返回 `UV_ENOBUFS` 并将 `size` 设置为所需的大小，包括空终止符.
 
     .. versionchanged:: 1.3.0 the returned length no longer includes the terminating null byte,
                         and the buffer is not null terminated.
