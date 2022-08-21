@@ -34,6 +34,7 @@
 #include <unistd.h>
 
 struct watcher_list {
+  // 红黑树
   RB_ENTRY(watcher_list) entry;
   QUEUE watchers;
   int iterating;
@@ -68,15 +69,23 @@ static void maybe_free_watcher_list(struct watcher_list* w,
 static int init_inotify(uv_loop_t* loop) {
   int fd;
 
+  // 如果已经存在 inotify_fd 不需要初始化
   if (loop->inotify_fd != -1)
     return 0;
 
+  // 调用 inotify_init1 申请文件描述符 -> man inotify_init1
   fd = inotify_init1(IN_NONBLOCK | IN_CLOEXEC);
   if (fd < 0)
     return UV__ERR(errno);
 
+  // 绑定到 loop 上
   loop->inotify_fd = fd;
+  // uv__inotify_read io 初始化
+  // watcher 为 loop->inotify_read_watcher
+  // 回调为 uv__inotify_read
+  // 对应的文件描述符为 loop->inotify_fd
   uv__io_init(&loop->inotify_read_watcher, uv__inotify_read, loop->inotify_fd);
+  // 启动 io, 事件为 POLLIN, 观察可读
   uv__io_start(loop, &loop->inotify_read_watcher, POLLIN);
 
   return 0;
@@ -149,8 +158,10 @@ int uv__inotify_fork(uv_loop_t* loop, void* old_watchers) {
 
 
 static struct watcher_list* find_watcher(uv_loop_t* loop, int wd) {
+  // loop 中 inotify_watchers 是否存在 w
   struct watcher_list w;
   w.wd = wd;
+  // 红黑树查找
   return RB_FIND(watcher_root, CAST(&loop->inotify_watchers), &w);
 }
 
@@ -164,6 +175,7 @@ static void maybe_free_watcher_list(struct watcher_list* w, uv_loop_t* loop) {
   }
 }
 
+// 读通知事件
 static void uv__inotify_read(uv_loop_t* loop,
                              uv__io_t* dummy,
                              unsigned int events) {
@@ -178,11 +190,14 @@ static void uv__inotify_read(uv_loop_t* loop,
   /* needs to be large enough for sizeof(inotify_event) + strlen(path) */
   char buf[4096];
 
+  // 循环
   for (;;) {
     do
+      // 读取 inotify_fd 事件信息
       size = read(loop->inotify_fd, buf, sizeof(buf));
     while (size == -1 && errno == EINTR);
 
+    // 错误处理
     if (size == -1) {
       assert(errno == EAGAIN || errno == EWOULDBLOCK);
       break;
@@ -196,11 +211,14 @@ static void uv__inotify_read(uv_loop_t* loop,
 
       events = 0;
       if (e->mask & (IN_ATTRIB|IN_MODIFY))
+        // change 事件
         events |= UV_CHANGE;
       if (e->mask & ~(IN_ATTRIB|IN_MODIFY))
+        // rename 事件
         events |= UV_RENAME;
 
       w = find_watcher(loop, e->wd);
+      // 找到对应的 watcher
       if (w == NULL)
         continue; /* Stale event, no watchers left. */
 
@@ -221,6 +239,7 @@ static void uv__inotify_read(uv_loop_t* loop,
        * tell uv_fs_event_stop() (that could be called from a user's callback)
        * not to free watcher_list.
        */
+      // 遍历触发回调
       w->iterating = 1;
       QUEUE_MOVE(&w->watchers, &queue);
       while (!QUEUE_EMPTY(&queue)) {
@@ -241,6 +260,7 @@ static void uv__inotify_read(uv_loop_t* loop,
 
 
 int uv_fs_event_init(uv_loop_t* loop, uv_fs_event_t* handle) {
+  // 初始化 UV_FS_EVENT handle
   uv__handle_init(loop, (uv_handle_t*)handle, UV_FS_EVENT);
   return 0;
 }
@@ -256,9 +276,11 @@ int uv_fs_event_start(uv_fs_event_t* handle,
   int err;
   int wd;
 
+  // 当前 handle 是否存活
   if (uv__is_active(handle))
     return UV_EINVAL;
 
+  // 初始化通知
   err = init_inotify(handle->loop);
   if (err)
     return err;
@@ -272,19 +294,26 @@ int uv_fs_event_start(uv_fs_event_t* handle,
          | IN_MOVED_FROM
          | IN_MOVED_TO;
 
+  // 添加监控
   wd = inotify_add_watch(handle->loop->inotify_fd, path, events);
+  // 添加失败
   if (wd == -1)
     return UV__ERR(errno);
 
+  // 是否已经添加到 loop 中
   w = find_watcher(handle->loop, wd);
+  // 已经存在不需要再添加
   if (w)
     goto no_insert;
 
+  // 申请 watcher_list
   len = strlen(path) + 1;
   w = uv__malloc(sizeof(*w) + len);
+  // 申请失败
   if (w == NULL)
     return UV_ENOMEM;
 
+  // 初始化
   w->wd = wd;
   w->path = memcpy(w + 1, path, len);
   QUEUE_INIT(&w->watchers);
@@ -292,10 +321,16 @@ int uv_fs_event_start(uv_fs_event_t* handle,
   RB_INSERT(watcher_root, CAST(&handle->loop->inotify_watchers), w);
 
 no_insert:
+  // 列表中已经存在不需要再添加 fd
+  // 激活 handle
   uv__handle_start(handle);
+  // 当前 watcher 插入到 watcher_list 的 watcher
   QUEUE_INSERT_TAIL(&w->watchers, &handle->watchers);
+  // 设置 handle 的 path
   handle->path = w->path;
+  // 设置 callback
   handle->cb = cb;
+  // 设置 wd
   handle->wd = wd;
 
   return 0;

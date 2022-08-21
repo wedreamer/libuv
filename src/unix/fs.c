@@ -102,6 +102,7 @@ extern char *mkdtemp(char *template); /* See issue #740 on AIX < 7 */
   do {                                                                        \
     if (req == NULL)                                                          \
       return UV_EINVAL;                                                       \
+    /*初始化 req*/                                                             \
     UV_REQ_INIT(req, UV_FS);                                                  \
     req->fs_type = UV_FS_ ## subtype;                                         \
     req->result = 0;                                                          \
@@ -120,6 +121,7 @@ extern char *mkdtemp(char *template); /* See issue #740 on AIX < 7 */
     if (cb == NULL) {                                                         \
       req->path = path;                                                       \
     } else {                                                                  \
+      /** path copy */                                                        \
       req->path = uv__strdup(path);                                           \
       if (req->path == NULL)                                                  \
         return UV_ENOMEM;                                                     \
@@ -1694,6 +1696,7 @@ static ssize_t uv__fs_write_all(uv_fs_t* req) {
 }
 
 
+// fs work
 static void uv__fs_work(struct uv__work* w) {
   int retry_on_eintr;
   uv_fs_t* req;
@@ -2122,9 +2125,13 @@ int uv_fs_sendfile(uv_loop_t* loop,
 }
 
 
+// 文件状态
 int uv_fs_stat(uv_loop_t* loop, uv_fs_t* req, const char* path, uv_fs_cb cb) {
+  // 初始化相关数据
   INIT(STAT);
+  // path 有效
   PATH;
+  // 提交到线程池处理
   POST;
 }
 
@@ -2192,6 +2199,7 @@ int uv_fs_write(uv_loop_t* loop,
 }
 
 
+// fs req 清理
 void uv_fs_req_cleanup(uv_fs_t* req) {
   if (req == NULL)
     return;

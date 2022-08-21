@@ -42,7 +42,8 @@ static void uv__async_send(uv_loop_t* loop);
 static int uv__async_start(uv_loop_t* loop);
 static void uv__cpu_relax(void);
 
-
+// 异步调用
+// 允许用户唤醒事件循环从另一个线程调用回调
 int uv_async_init(uv_loop_t* loop, uv_async_t* handle, uv_async_cb async_cb) {
   int err;
 
@@ -73,6 +74,7 @@ int uv_async_send(uv_async_t* handle) {
   pending = (_Atomic int*) &handle->pending;
 
   /* Do a cheap read first. */
+  // 最新的 pending 值
   if (atomic_load_explicit(pending, memory_order_relaxed) != 0)
     return 0;
 
@@ -193,6 +195,7 @@ static void uv__async_send(uv_loop_t* loop) {
   fd = loop->async_wfd;
 
 #if defined(__linux__)
+  // 唤醒, 设置 loop->async_io_watcher.fd
   if (fd == -1) {
     static const uint64_t val = 1;
     buf = &val;
@@ -202,6 +205,8 @@ static void uv__async_send(uv_loop_t* loop) {
 #endif
 
   do
+  // 这个时候 async 一定是完成的
+  // 读取管道中的数据
     r = write(fd, buf, len);
   while (r == -1 && errno == EINTR);
 
@@ -217,10 +222,11 @@ static void uv__async_send(uv_loop_t* loop) {
 
 
 static int uv__async_start(uv_loop_t* loop) {
+  // 初始化管道, 为线程间的通信做准备
   int pipefd[2];
   int err;
 
-  // default, 没有初始化,  如果 async 中的 epoll 没有进行初始化
+  // default, 没有初始化,  如果 async 中的 fd 没有进行初始化
   if (loop->async_io_watcher.fd != -1)
     return 0;
 
@@ -234,7 +240,9 @@ static int uv__async_start(uv_loop_t* loop) {
   // 设置管道
   // TODO： 
   // async_io_watcher.fd
+  // 读端设置
   pipefd[0] = err;
+  // 写端设置
   // loop->async_wfd
   pipefd[1] = -1;
 #else

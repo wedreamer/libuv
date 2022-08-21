@@ -902,7 +902,7 @@ void uv__io_init(uv__io_t* w, uv__io_cb cb, int fd) {
   // 初始化 watcher 的 watcher_queue
   QUEUE_INIT(&w->pending_queue);
   QUEUE_INIT(&w->watcher_queue);
-  // 设置回调, 以及管道符号
+  // 设置回调, 以及 fd
   w->cb = cb;
   w->fd = fd;
   // 设置事件
@@ -930,12 +930,12 @@ void uv__io_start(uv_loop_t* loop, uv__io_t* w, unsigned int events) {
     return;
 #endif
 
-  // 如果 async io 观察队列为空
+  // 如果 io 观察队列为空
   if (QUEUE_EMPTY(&w->watcher_queue))
-    // 将 async io 插入到 loop 的观察队列中, 相当于什么都不操作
+    // 将 io 插入到 loop 的观察队列中, 相当于什么都不操作
     QUEUE_INSERT_TAIL(&loop->watcher_queue, &w->watcher_queue);
 
-  // 如果 loop 中 wathers 没有 async io 的 fd
+  // 如果 loop 中 wathers 没有 io 的 fd
   if (loop->watchers[w->fd] == NULL) {
     // 添加
     loop->watchers[w->fd] = w;

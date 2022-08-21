@@ -57,7 +57,9 @@ static uv_stat_t zero_statbuf;
 
 
 int uv_fs_poll_init(uv_loop_t* loop, uv_fs_poll_t* handle) {
+  // 初始化 fs_poll handle
   uv__handle_init(loop, (uv_handle_t*)handle, UV_FS_POLL);
+  // 设置 poll_ctx 上下文
   handle->poll_ctx = NULL;
   return 0;
 }
@@ -72,13 +74,16 @@ int uv_fs_poll_start(uv_fs_poll_t* handle,
   size_t len;
   int err;
 
+  // 判断 handle 是否存活
   if (uv_is_active((uv_handle_t*)handle))
     return 0;
 
   loop = handle->loop;
   len = strlen(path);
+  // 初始化 poll_ctx
   ctx = uv__calloc(1, sizeof(*ctx) + len);
 
+  // 初始化失败
   if (ctx == NULL)
     return UV_ENOMEM;
 
@@ -89,6 +94,7 @@ int uv_fs_poll_start(uv_fs_poll_t* handle,
   ctx->parent_handle = handle;
   memcpy(ctx->path, path, len + 1);
 
+  // 初始化定时器, 定是轮询
   err = uv_timer_init(loop, &ctx->timer_handle);
   if (err < 0)
     goto error;
@@ -97,12 +103,15 @@ int uv_fs_poll_start(uv_fs_poll_t* handle,
   uv__handle_unref(&ctx->timer_handle);
 
   err = uv_fs_stat(loop, &ctx->fs_req, ctx->path, poll_cb);
+  // fs_stat 失败
   if (err < 0)
     goto error;
 
+  // 双向绑定
   if (handle->poll_ctx != NULL)
     ctx->previous = handle->poll_ctx;
   handle->poll_ctx = ctx;
+  // 激活 handle
   uv__handle_start(handle);
 
   return 0;

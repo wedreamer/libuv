@@ -2,6 +2,7 @@
     "files.associations": {
         "*.json": "jsonc",
         "random": "c",
-        "uv.h": "c"
+        "uv.h": "c",
+        "typeinfo": "c"
     }
 }

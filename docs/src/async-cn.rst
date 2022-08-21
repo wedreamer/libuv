@@ -46,7 +46,7 @@ API
     :returns: 0 on success, or an error code < 0 on failure.
 
     .. note::
-        从任何线程调用此函数都是安全的。 回调将在循环线程上调用。
+        从任何线程调用此函数都是安全的。 回调将在线程循环上调用。
 
     .. note::
         :c:func:`uv_async_send` is `async-signal-safe <https://man7.org/linux/man-pages/man7/signal-safety.7.html>`_.
